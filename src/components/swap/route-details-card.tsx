@@ -74,7 +74,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           {/* Multi-hop route skeleton - more prominent */}
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center">
-                <Loader2 className="h-4 w-4 mr-2 animate-spin text-primary" />
+                <Loader2 className="h-5 w-5 mr-2 animate-spin text-primary" /> {/* Increased icon size */}
                 <span>Searching for Optimal Multi-Hop Route...</span>
             </h3>
             <div className="flex flex-nowrap items-center gap-x-4 p-4 bg-secondary rounded-lg overflow-x-auto">
@@ -86,8 +86,8 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
                   </div>
                   {i < 2 && (
                     <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
-                      <Skeleton className="h-8 w-8 rounded" />
-                      <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted border border-border px-3.5 py-1.5 shadow-sm" />
+                      <Skeleton className="h-8 w-8 rounded" /> {/* Arrow skeleton */}
+                      <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted border border-border px-3.5 py-1.5 shadow-sm" /> {/* DEX skeleton */}
                     </div>
                   )}
                 </React.Fragment>
@@ -275,5 +275,3 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
     </Card>
   );
 }
-
-    
