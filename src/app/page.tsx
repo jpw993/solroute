@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { SwapFormValues } from '@/schemas/swap-schema';
 import { mockTokens, type Token } from '@/lib/tokens';
 import { findOptimalRoute, type FindOptimalRouteInput, type FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
@@ -17,6 +17,7 @@ import { Terminal } from 'lucide-react';
 
 export default function HomePage() {
   const { toast } = useToast();
+  const routeDetailsRef = useRef<HTMLDivElement>(null);
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined);
@@ -97,11 +98,17 @@ export default function HomePage() {
         title: "Route Found!",
         description: `Optimal route from ${inputTokenDetails.symbol} to ${outputTokenDetails.symbol} calculated.`,
       });
+      if (routeDetailsRef.current) {
+        routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } catch (error) {
       console.error("Error finding optimal route:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to find optimal route.";
       setRouteError(errorMessage);
       toast({ title: "Route Finding Error", description: errorMessage, variant: "destructive" });
+      if (routeDetailsRef.current) {
+        routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     } finally {
       setIsLoadingRoute(false);
     }
@@ -151,7 +158,7 @@ export default function HomePage() {
           </div>
         </div>
         
-        <div className="mt-8">
+        <div className="mt-8" ref={routeDetailsRef}>
           {routeError && !isLoadingRoute && (
             <Alert variant="destructive" className="shadow-md mb-8">
               <Terminal className="h-4 w-4" />
