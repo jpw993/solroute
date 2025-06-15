@@ -32,7 +32,7 @@ const FindOptimalRouteOutputSchema = z.object({
 });
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
 
-const DEX_POOL = ['Raydium', 'Orca', 'Jupiter', 'Serum', 'Aldrin', 'Saber', 'Lifinity', 'Cropper'];
+const DEX_POOL = ['Raydium', 'Orca', 'Serum', 'Aldrin', 'Saber', 'Lifinity', 'Cropper'];
 const ALL_TOKEN_SYMBOLS = mockTokens.map(t => t.symbol);
 
 // Mock exchange rates relative to USDC
