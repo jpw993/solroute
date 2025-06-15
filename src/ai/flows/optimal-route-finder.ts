@@ -10,6 +10,7 @@
  */
 
 import {z} from 'genkit';
+import { mockTokens } from '@/lib/tokens'; // For accessing token symbols
 
 const FindOptimalRouteInputSchema = z.object({
   inputToken: z.string().describe('The symbol or address of the input token.'),
@@ -31,63 +32,119 @@ const FindOptimalRouteOutputSchema = z.object({
 });
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
 
+const DEX_POOL = ['Raydium', 'Orca', 'Jupiter', 'Serum', 'Aldrin', 'Saber'];
+const ALL_TOKEN_SYMBOLS = mockTokens.map(t => t.symbol);
+
+function getRandomElement<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<FindOptimalRouteOutput> {
   const { inputToken, outputToken, amount } = input;
+  const route: Array<z.infer<typeof RouteHopSchema>> = [];
+  let currentToken = inputToken;
+  let currentAmount = amount;
+  let totalSlippageFactor = 1.0;
 
-  let intermediateTokenSymbol: string;
+  const numHops = Math.floor(Math.random() * 3) + 2; // Generate 2, 3, or 4 hops
 
-  if (inputToken !== 'USDC' && outputToken !== 'USDC') {
-    intermediateTokenSymbol = 'USDC';
-  } else if (inputToken !== 'SOL' && outputToken !== 'SOL') {
-    intermediateTokenSymbol = 'SOL';
-  } else {
-    intermediateTokenSymbol = 'RAY'; // Fallback if both USDC and SOL are endpoints
-    // Ensure RAY is not also an endpoint, for a more robust mock this could be refined
-    if (intermediateTokenSymbol === inputToken || intermediateTokenSymbol === outputToken) {
-        // If RAY is also an endpoint, pick another distinct token if available or a generic placeholder
-        const otherTokens = ['JUP', 'BONK', 'ETH', 'BTC']; // Example other tokens
-        const distinctToken = otherTokens.find(t => t !== inputToken && t !== outputToken);
-        intermediateTokenSymbol = distinctToken || 'ANY_INTERMEDIATE'; // A generic placeholder if no distinct found
-    }
+  const availableIntermediateTokens = ALL_TOKEN_SYMBOLS.filter(
+    t => t !== inputToken && t !== outputToken
+  );
+
+  if (availableIntermediateTokens.length === 0 && numHops > 1) {
+    // Cannot create multi-hop route if no intermediate tokens are available
+    // Fallback to a simpler direct route or throw error, here we simplify.
+     // This case should be rare with a decent token list
+    const directDex = getRandomElement(DEX_POOL);
+    const feePercent = 0.003; // 0.3%
+    const slippagePercent = 0.005; // 0.5%
+    const amountAfterFee = currentAmount * (1 - feePercent);
+    currentAmount = amountAfterFee * (1 - slippagePercent);
+    totalSlippageFactor *= (1 - slippagePercent);
+    route.push({
+        dex: directDex,
+        tokenIn: inputToken,
+        tokenOut: outputToken,
+    });
+
+    return {
+        route,
+        estimatedOutput: currentAmount,
+        slippage: 1 - totalSlippageFactor,
+    };
   }
 
 
-  const dex1 = 'Raydium';
-  const dex2 = 'Orca';
+  let previousIntermediateToken = '';
 
-  const feeHop1Percent = 0.0025; // 0.25%
-  const slippageHop1Percent = 0.005; // 0.5%
-  const feeHop2Percent = 0.0030; // 0.30%
-  const slippageHop2Percent = 0.006; // 0.6%
+  for (let i = 0; i < numHops; i++) {
+    const hopDex = getRandomElement(DEX_POOL);
+    let nextToken: string;
 
-  // Calculate amount after first hop (fees and slippage)
-  const amountAfterFee1 = amount * (1 - feeHop1Percent);
-  const amountAfterSlippage1 = amountAfterFee1 * (1 - slippageHop1Percent);
-  const intermediateAmountObtained = amountAfterSlippage1;
+    if (i === numHops - 1) {
+      // Last hop
+      nextToken = outputToken;
+    } else {
+      // Intermediate hop
+      let potentialNextTokens = availableIntermediateTokens.filter(t => t !== currentToken && t !== previousIntermediateToken);
+      if (potentialNextTokens.length === 0) {
+        // Fallback if filtering leaves no options, might happen with small token pools
+        // or very specific input/output. Pick any available intermediate not current.
+        potentialNextTokens = availableIntermediateTokens.filter(t => t !== currentToken);
+         if (potentialNextTokens.length === 0) {
+            // Highly unlikely, but as a last resort, use a generic placeholder or break
+            // For mock, let's assume we can always find one or output token is next
+             if (numHops === i + 1) { // if this was meant to be the last hop
+                nextToken = outputToken;
+             } else {
+                // This state indicates an issue with token pool or logic, force outputToken
+                // to prevent infinite loop or error, effectively shortening the route.
+                nextToken = outputToken;
+                // Adjust numHops to reflect early termination if not already last hop
+                // numHops = i + 1; // This line would break the loop condition. Better to just let it use outputToken.
+             }
+         }
+      }
+      nextToken = getRandomElement(potentialNextTokens) || outputToken; // Fallback to outputToken if random selection fails
+      previousIntermediateToken = nextToken;
+    }
 
-  // Calculate amount after second hop (fees and slippage)
-  const amountAfterFee2 = intermediateAmountObtained * (1 - feeHop2Percent);
-  const estimatedOutputAmount = amountAfterFee2 * (1 - slippageHop2Percent);
+    // Simulate per-hop fees and slippage
+    const hopFeePercent = 0.002 + Math.random() * 0.002; // e.g., 0.2% to 0.4%
+    const hopSlippagePercent = 0.003 + Math.random() * 0.004; // e.g., 0.3% to 0.7%
 
-  // Calculate combined slippage factor for the entire route
-  const combinedSlippageFactor = 1 - (1 - slippageHop1Percent) * (1 - slippageHop2Percent);
+    const amountAfterFee = currentAmount * (1 - hopFeePercent);
+    currentAmount = amountAfterFee * (1 - hopSlippagePercent);
+    totalSlippageFactor *= (1 - hopSlippagePercent);
 
-  const route: FindOptimalRouteOutput['route'] = [
-    {
-      dex: dex1,
-      tokenIn: inputToken,
-      tokenOut: intermediateTokenSymbol,
-    },
-    {
-      dex: dex2,
-      tokenIn: intermediateTokenSymbol,
-      tokenOut: outputToken,
-    },
-  ];
+    route.push({
+      dex: hopDex,
+      tokenIn: currentToken,
+      tokenOut: nextToken,
+    });
+
+    currentToken = nextToken;
+    if (currentToken === outputToken && i < numHops -1) {
+        // Reached output token earlier than expected, stop adding hops
+        break;
+    }
+  }
+  
+  // Ensure the last hop's output is indeed the outputToken if loop finished early
+  if (route.length > 0 && route[route.length-1].tokenOut !== outputToken && currentToken !== outputToken) {
+    // This can happen if random token selection logic failed to make progress towards outputToken
+    // or if availableIntermediateTokens was exhausted.
+    // As a fallback, we can either try to add one final hop to outputToken
+    // or adjust the last hop. For simplicity, let's adjust the last hop if possible.
+    // Or, it implies the route could not be formed as requested.
+    // For this mock, we'll assume the loop correctly terminates or is broken.
+  }
+
 
   return {
     route,
-    estimatedOutput: estimatedOutputAmount,
-    slippage: combinedSlippageFactor, // Representing total slippage percentage
+    estimatedOutput: currentAmount,
+    slippage: 1 - totalSlippageFactor,
   };
 }
