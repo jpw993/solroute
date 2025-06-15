@@ -90,7 +90,7 @@ export function RouteDetailsCard({ routeOutput, isLoading }: RouteDetailsCardPro
           <div className="flex flex-col">
             <span className="text-sm text-muted-foreground mb-1">Estimated Output</span>
             <span className="text-lg font-semibold text-green-600">
-              {estimatedOutput.toLocaleString(undefined, { maximumFractionDigits: 6 })} {outputTokenSymbol}
+              {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {outputTokenSymbol}
             </span>
           </div>
           <div className="flex flex-col">
