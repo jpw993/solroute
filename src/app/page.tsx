@@ -67,6 +67,11 @@ export default function HomePage() {
     setRouteError(null);
     setRouteData(null);
 
+    // Scroll immediately when loading starts
+    if (routeDetailsRef.current) {
+      routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     const inputTokenDetails = mockTokens.find(t => t.id === data.inputTokenId);
     const outputTokenDetails = mockTokens.find(t => t.id === data.outputTokenId);
 
@@ -98,17 +103,13 @@ export default function HomePage() {
         title: "Route Found!",
         description: `Optimal route from ${inputTokenDetails.symbol} to ${outputTokenDetails.symbol} calculated.`,
       });
-      if (routeDetailsRef.current) {
-        routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      // No need to scroll here again as it's done at the start of loading
     } catch (error) {
       console.error("Error finding optimal route:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to find optimal route.";
       setRouteError(errorMessage);
       toast({ title: "Route Finding Error", description: errorMessage, variant: "destructive" });
-      if (routeDetailsRef.current) {
-        routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      // No need to scroll here again as it's done at the start of loading
     } finally {
       setIsLoadingRoute(false);
     }
