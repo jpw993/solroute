@@ -14,11 +14,13 @@ import { SwapConfirmationCard } from '@/components/swap/swap-confirmation-card';
 import { WalletInfoCard } from '@/components/wallet/wallet-info-card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from 'lucide-react';
+import { LandingAnimation } from '@/components/layout/landing-animation'; // Import the new landing animation
 
 export default function HomePage() {
   const { toast } = useToast();
   const routeDetailsRef = useRef<HTMLDivElement>(null);
 
+  const [showLandingAnimation, setShowLandingAnimation] = useState(true); // State for landing animation
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined);
   
@@ -29,13 +31,23 @@ export default function HomePage() {
   const [isExecuting, setIsExecuting] = useState(false);
   
   useEffect(() => {
+    // Timer for landing animation
+    const landingTimer = setTimeout(() => {
+      setShowLandingAnimation(false);
+    }, 3000); // Display for 3 seconds
+
+    // Wallet connection persistence
     const storedWalletState = localStorage.getItem('solroute-wallet-connected');
     const storedWalletAddress = localStorage.getItem('solroute-wallet-address');
     if (storedWalletState === 'true' && storedWalletAddress) {
       setWalletConnected(true);
       setWalletAddress(storedWalletAddress);
     }
-  }, []);
+
+    return () => {
+      clearTimeout(landingTimer); // Cleanup landing timer
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
 
   const handleConnectWallet = () => {
     const mockAddress = `mock${Math.random().toString(36).substring(2, 10)}...${Math.random().toString(36).substring(2, 6)}`;
@@ -67,7 +79,7 @@ export default function HomePage() {
     setRouteError(null);
     setRouteData(null);
 
-    // Scroll immediately when loading starts, deferring slightly for DOM updates
+    // Scroll immediately when loading starts
     setTimeout(() => {
       if (routeDetailsRef.current) {
         routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -94,7 +106,6 @@ export default function HomePage() {
     const findRoutePromise = findOptimalRoute(aiInput);
 
     try {
-      // Wait for both the API call and the artificial delay
       const [_, result] = await Promise.all([
         artificialDelay,
         findRoutePromise
@@ -130,6 +141,9 @@ export default function HomePage() {
     }, 2500);
   };
   
+  if (showLandingAnimation) {
+    return <LandingAnimation />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
