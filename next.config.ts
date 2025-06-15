@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'raw.githubusercontent.com',
         port: '',
-        pathname: '/solana-labs/token-list/main/assets/mainnet/**',
+        pathname: '/**', // Changed to be more permissive for troubleshooting
       }
     ],
   },
