@@ -37,7 +37,7 @@ export function LandingAnimation() {
       `}</style>
       <div className="logo-container-animate">
         {/* Display logo larger for the splash screen */}
-        <LogoIcon style={{ width: '350px', height: 'auto' }} /> {/* Increased logo size significantly */}
+        <LogoIcon style={{ width: '700px', height: 'auto' }} /> {/* Increased logo size significantly */}
       </div>
       <p className="mt-8 text-lg md:text-xl font-medium text-primary animate-pulse text-center px-4">
         Machine Learning powered DEX routing {/* Slogan */}
