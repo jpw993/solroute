@@ -27,7 +27,6 @@ const RouteHopSchema = z.object({
 const FindOptimalRouteOutputSchema = z.object({
   route: z.array(RouteHopSchema).describe('The optimal route for the swap.'),
   estimatedOutput: z.number().describe('The estimated output amount of the output token.'),
-  fees: z.number().describe('The estimated fees for the entire route'),
   slippage: z.number().describe('The estimated slippage for the entire route'),
 });
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
@@ -70,11 +69,6 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   const amountAfterFee2 = intermediateAmountObtained * (1 - feeHop2Percent);
   const estimatedOutputAmount = amountAfterFee2 * (1 - slippageHop2Percent);
 
-  // Calculate total fees
-  const fee1Value = amount * feeHop1Percent;
-  const fee2Value = intermediateAmountObtained * feeHop2Percent; // Fee on the amount entering hop 2
-  const totalFeesValue = fee1Value + fee2Value;
-
   // Calculate combined slippage factor for the entire route
   const combinedSlippageFactor = 1 - (1 - slippageHop1Percent) * (1 - slippageHop2Percent);
 
@@ -94,8 +88,6 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   return {
     route,
     estimatedOutput: estimatedOutputAmount,
-    fees: totalFeesValue,
     slippage: combinedSlippageFactor, // Representing total slippage percentage
   };
 }
-

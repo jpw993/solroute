@@ -27,8 +27,8 @@ export function RouteDetailsCard({ routeOutput, isLoading }: RouteDetailsCardPro
               <Skeleton className="h-8 w-16 rounded" />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-            {[1, 2, 3].map(i => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            {[1, 2].map(i => (
               <div key={i} className="space-y-1">
                 <Skeleton className="h-4 w-20 rounded" />
                 <Skeleton className="h-6 w-24 rounded" />
@@ -44,7 +44,7 @@ export function RouteDetailsCard({ routeOutput, isLoading }: RouteDetailsCardPro
     return null; // Don't render if no route data and not loading
   }
 
-  const { route, estimatedOutput, fees, slippage } = routeOutput;
+  const { route, estimatedOutput, slippage } = routeOutput;
   const outputTokenSymbol = route.length > 0 ? route[route.length - 1].tokenOut : 'Output Token';
 
 
@@ -86,17 +86,11 @@ export function RouteDetailsCard({ routeOutput, isLoading }: RouteDetailsCardPro
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4 pt-4 border-t">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 border-t">
           <div className="flex flex-col">
             <span className="text-sm text-muted-foreground mb-1">Estimated Output</span>
             <span className="text-lg font-semibold text-green-600">
               {estimatedOutput.toLocaleString(undefined, { maximumFractionDigits: 6 })} {outputTokenSymbol}
-            </span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm text-muted-foreground mb-1">Estimated Fees</span>
-            <span className="text-lg font-semibold text-foreground">
-              {fees.toLocaleString(undefined, { maximumFractionDigits: 6 })} units
             </span>
           </div>
           <div className="flex flex-col">
@@ -107,7 +101,7 @@ export function RouteDetailsCard({ routeOutput, isLoading }: RouteDetailsCardPro
           </div>
         </div>
         
-        <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-sm text-blue-700">
+        <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-sm text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300">
           <Info className="h-5 w-5 mr-2 shrink-0 mt-0.5" />
           <p>This is an estimated route. Actual output may vary due to market volatility and network conditions. Always verify transaction details in your wallet before confirming.</p>
         </div>
