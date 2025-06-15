@@ -21,6 +21,4 @@ export const mockTokens: Token[] = [
   { id: 'BONK', symbol: 'BONK', name: 'Bonk', iconSrc: 'https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I', decimals: 5, balance: 5000000 },
   { id: 'RAY', symbol: 'RAY', name: 'Raydium', iconSrc: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png', decimals: 6, balance: 120 },
   { id: 'BTC', symbol: 'BTC', name: 'Bitcoin (Wrapped)', iconSrc: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png', decimals: 8, balance: 0.5 }, // Wormhole BTC
-  { id: 'ETH', symbol: 'ETH', name: 'Ethereum (Wrapped)', iconSrc: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk/logo.png', decimals: 8, balance: 2.1 }, // Wormhole ETH
 ];
-

@@ -43,7 +43,6 @@ const MOCK_RATES_USD: Record<string, number> = {
   BONK: 0.000020, // 1 BONK = 0.000020 USDC
   RAY: 1.5,    // 1 RAY = 1.5 USDC
   BTC: 60000,  // 1 BTC (Wrapped) = 60000 USDC
-  ETH: 3000,   // 1 ETH (Wrapped) = 3000 USDC
 };
 
 function getExchangeRate(tokenInSymbol: string, tokenOutSymbol: string): number {
@@ -172,4 +171,3 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     slippage: 1 - totalSlippageFactor, // Total accumulated slippage factor
   };
 }
-
