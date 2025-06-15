@@ -24,14 +24,15 @@ const PathfindingAnimation: React.FC = () => {
             fill: ${nodeColor}; 
             stroke: ${dexBoxStrokeColor}; 
             stroke-width: 1.5; 
-            animation: node-appear 0.5s ease-out forwards;
+            animation: node-appear 0.2s ease-out forwards;
             opacity: 0;
+            transform-origin: center center;
           }
-          .node-circle-0 { animation-delay: 0s; }
-          .node-circle-1 { animation-delay: 0.8s; }
-          .node-circle-2 { animation-delay: 1.6s; }
-          .node-circle-3 { animation-delay: 2.4s; }
-          .node-circle-4 { animation-delay: 3.2s; }
+          .node-circle-0 { animation-delay: 0s; } /* Input */
+          .node-circle-1 { animation-delay: 0.2s; } /* Corresponds to DEX1 logic, hidden node */
+          .node-circle-2 { animation-delay: 0.4s; } /* Corresponds to DEX2 logic, hidden node */
+          .node-circle-3 { animation-delay: 0.6s; } /* Corresponds to DEX3 logic, hidden node */
+          .node-circle-4 { animation-delay: 0.8s; } /* Output */
 
 
           .node-text { 
@@ -39,26 +40,27 @@ const PathfindingAnimation: React.FC = () => {
             fill: ${textColor}; 
             text-anchor: middle; 
             dominant-baseline: central; 
-            animation: text-appear 0.5s ease-out forwards;
+            animation: text-appear 0.2s ease-out forwards;
             opacity: 0;
           }
-          .node-text-0 { animation-delay: 0.1s; }
-          .node-text-1 { animation-delay: 0.9s; }
-          .node-text-2 { animation-delay: 1.7s; }
-          .node-text-3 { animation-delay: 2.5s; }
-          .node-text-4 { animation-delay: 3.3s; }
+          .node-text-0 { animation-delay: 0.05s; }
+          .node-text-1 { animation-delay: 0.25s; } /* Hidden, for potential intermediate token text */
+          .node-text-2 { animation-delay: 0.45s; } /* Hidden */
+          .node-text-3 { animation-delay: 0.65s; } /* Hidden */
+          .node-text-4 { animation-delay: 0.85s; }
 
 
           .dex-box { 
             fill: ${dexBoxFillColor}; 
             stroke: ${dexBoxStrokeColor}; 
             stroke-width: 1; 
-            animation: node-appear 0.5s ease-out forwards;
+            animation: node-appear 0.2s ease-out forwards;
             opacity: 0;
+            transform-origin: center center;
           }
-          .dex-box-0 { animation-delay: 0.8s; }
-          .dex-box-1 { animation-delay: 1.6s; }
-          .dex-box-2 { animation-delay: 2.4s; }
+          .dex-box-0 { animation-delay: 0.2s; } /* DEX 1 */
+          .dex-box-1 { animation-delay: 0.4s; } /* DEX 2 */
+          .dex-box-2 { animation-delay: 0.6s; } /* DEX 3 */
 
 
           .dex-text { 
@@ -66,12 +68,12 @@ const PathfindingAnimation: React.FC = () => {
             fill: ${textColor}; 
             text-anchor: middle; 
             dominant-baseline: central; 
-            animation: text-appear 0.5s ease-out forwards;
+            animation: text-appear 0.2s ease-out forwards;
             opacity: 0;
           }
-          .dex-text-0 { animation-delay: 0.9s; }
-          .dex-text-1 { animation-delay: 1.7s; }
-          .dex-text-2 { animation-delay: 2.5s; }
+          .dex-text-0 { animation-delay: 0.25s; }
+          .dex-text-1 { animation-delay: 0.45s; }
+          .dex-text-2 { animation-delay: 0.65s; }
 
 
           .connecting-path { 
@@ -79,25 +81,25 @@ const PathfindingAnimation: React.FC = () => {
             stroke-width: 2; 
             stroke-dasharray: 100; /* Approximate length */
             stroke-dashoffset: 100;
-            animation: draw-line 0.7s ease-in-out forwards;
+            animation: draw-line 0.2s ease-in-out forwards;
           }
           .path-1 { animation-delay: 0.1s; }
-          .path-2 { animation-delay: 0.9s; }
-          .path-3 { animation-delay: 1.7s; }
-          .path-4 { animation-delay: 2.5s; }
+          .path-2 { animation-delay: 0.3s; }
+          .path-3 { animation-delay: 0.5s; }
+          .path-4 { animation-delay: 0.7s; }
 
           .pulse-line {
             stroke: ${pulseColor};
             stroke-width: 2.5;
             fill: none;
             stroke-dasharray: 8 4; /* Dashed line for pulsing effect */
-            animation: pulse-effect 1.2s linear infinite;
+            animation: pulse-effect 0.6s linear infinite, fade-in-pulse 0.2s ease-out forwards;
             opacity: 0; /* Initially hidden, shown via animation delay */
           }
-          .pulse-1 { animation-delay: 0.8s; animation-name: pulse-effect, fade-in-pulse; }
-          .pulse-2 { animation-delay: 1.6s; animation-name: pulse-effect, fade-in-pulse; }
-          .pulse-3 { animation-delay: 2.4s; animation-name: pulse-effect, fade-in-pulse; }
-          .pulse-4 { animation-delay: 3.2s; animation-name: pulse-effect, fade-in-pulse; }
+          .pulse-1 { animation-delay: 0.3s; }
+          .pulse-2 { animation-delay: 0.5s; }
+          .pulse-3 { animation-delay: 0.7s; }
+          .pulse-4 { animation-delay: 0.9s; }
 
 
           @keyframes node-appear {
@@ -117,9 +119,7 @@ const PathfindingAnimation: React.FC = () => {
           }
           @keyframes fade-in-pulse {
             0% { opacity: 0; }
-            10% { opacity: 1; } /* Fade in quickly */
-            90% { opacity: 1; }
-            100% { opacity: 1; } /* Stays visible while pulsing, then relies on overall animation duration */
+            100% { opacity: 1; }
           }
 
         `}</style>
@@ -146,10 +146,10 @@ const PathfindingAnimation: React.FC = () => {
         <text className="node-text node-text-4" x="370" y="60">OUT</text>
 
         {/* Connecting Paths (lines that draw) */}
-        <line className="connecting-path path-1" x1="45" y1="60" x2="85" y2="60" />
-        <line className="connecting-path path-2" x1="135" y1="60" x2="175" y2="60" />
-        <line className="connecting-path path-3" x1="225" y1="60" x2="265" y2="60" />
-        <line className="connecting-path path-4" x1="315" y1="60" x2="355" y2="60" />
+        <line className="connecting-path path-1" x1="45" y1="60" x2="85" y2="60" /> {/* IN to DEX1 area */}
+        <line className="connecting-path path-2" x1="135" y1="60" x2="175" y2="60" /> {/* DEX1 to DEX2 area */}
+        <line className="connecting-path path-3" x1="225" y1="60" x2="265" y2="60" /> {/* DEX2 to DEX3 area */}
+        <line className="connecting-path path-4" x1="315" y1="60" x2="355" y2="60" /> {/* DEX3 to OUT area */}
 
         {/* Pulsing Lines (animated overlay on top of connecting paths) */}
         <line className="pulse-line pulse-1" x1="45" y1="60" x2="85" y2="60" />
@@ -162,4 +162,3 @@ const PathfindingAnimation: React.FC = () => {
 };
 
 export default PathfindingAnimation;
-
