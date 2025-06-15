@@ -14,16 +14,19 @@ import { SwapConfirmationCard } from '@/components/swap/swap-confirmation-card';
 import { WalletInfoCard } from '@/components/wallet/wallet-info-card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from 'lucide-react';
-import { LandingAnimation } from '@/components/layout/landing-animation'; // Import the new landing animation
+import { LandingAnimation } from '@/components/layout/landing-animation';
 
 export default function HomePage() {
   const { toast } = useToast();
   const routeDetailsRef = useRef<HTMLDivElement>(null);
 
-  const [showLandingAnimation, setShowLandingAnimation] = useState(true); // State for landing animation
+  const [showLandingAnimation, setShowLandingAnimation] = useState(true);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined);
   
+  const [displayTokens, setDisplayTokens] = useState<Token[]>(mockTokens);
+  const [currentSwapInput, setCurrentSwapInput] = useState<FindOptimalRouteInput | null>(null);
+
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeData, setRouteData] = useState<FindOptimalRouteOutput | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
@@ -31,12 +34,10 @@ export default function HomePage() {
   const [isExecuting, setIsExecuting] = useState(false);
   
   useEffect(() => {
-    // Timer for landing animation
     const landingTimer = setTimeout(() => {
       setShowLandingAnimation(false);
-    }, 3000); // Display for 3 seconds
+    }, 3000);
 
-    // Wallet connection persistence
     const storedWalletState = localStorage.getItem('solroute-wallet-connected');
     const storedWalletAddress = localStorage.getItem('solroute-wallet-address');
     if (storedWalletState === 'true' && storedWalletAddress) {
@@ -45,9 +46,9 @@ export default function HomePage() {
     }
 
     return () => {
-      clearTimeout(landingTimer); // Cleanup landing timer
+      clearTimeout(landingTimer);
     };
-  }, []); // Empty dependency array ensures this runs once on mount
+  }, []);
 
   const handleConnectWallet = () => {
     const mockAddress = `mock${Math.random().toString(36).substring(2, 10)}...${Math.random().toString(36).substring(2, 6)}`;
@@ -68,6 +69,9 @@ export default function HomePage() {
     localStorage.removeItem('solroute-wallet-connected');
     localStorage.removeItem('solroute-wallet-address');
     setRouteData(null); 
+    setCurrentSwapInput(null);
+    // Reset token balances to initial mock state if desired, or keep them as is
+    // setDisplayTokens(mockTokens); 
     toast({
       title: "Wallet Disconnected",
       description: "You have successfully disconnected your wallet.",
@@ -78,16 +82,16 @@ export default function HomePage() {
     setIsLoadingRoute(true);
     setRouteError(null);
     setRouteData(null);
+    setCurrentSwapInput(null);
 
-    // Scroll immediately when loading starts
     setTimeout(() => {
       if (routeDetailsRef.current) {
         routeDetailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 0);
 
-    const inputTokenDetails = mockTokens.find(t => t.id === data.inputTokenId);
-    const outputTokenDetails = mockTokens.find(t => t.id === data.outputTokenId);
+    const inputTokenDetails = displayTokens.find(t => t.id === data.inputTokenId);
+    const outputTokenDetails = displayTokens.find(t => t.id === data.outputTokenId);
 
     if (!inputTokenDetails || !outputTokenDetails) {
       setRouteError("Invalid token selection.");
@@ -101,6 +105,7 @@ export default function HomePage() {
       outputToken: outputTokenDetails.symbol,
       amount: data.amount,
     };
+    setCurrentSwapInput(aiInput); // Store for use in execute swap
 
     const artificialDelay = new Promise(resolve => setTimeout(resolve, 3000));
     const findRoutePromise = findOptimalRoute(aiInput);
@@ -120,6 +125,7 @@ export default function HomePage() {
       console.error("Error finding optimal route:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to find optimal route.";
       setRouteError(errorMessage);
+      setCurrentSwapInput(null);
       toast({ title: "Route Finding Error", description: errorMessage, variant: "destructive" });
     } finally {
       setIsLoadingRoute(false);
@@ -127,17 +133,41 @@ export default function HomePage() {
   };
 
   const handleExecuteSwap = () => {
-     if (!routeData) return;
+     if (!routeData || !currentSwapInput) return;
     setIsExecuting(true);
+
     setTimeout(() => {
+      // Simulate balance update
+      const inputTokenSymbol = currentSwapInput.inputToken;
+      const outputTokenSymbol = currentSwapInput.outputToken;
+      const amountSwapped = currentSwapInput.amount;
+      const amountReceived = routeData.estimatedOutput;
+
+      setDisplayTokens(prevTokens => 
+        prevTokens.map(token => {
+          if (token.symbol === inputTokenSymbol) {
+            const newBalance = (token.balance || 0) - amountSwapped;
+            return { ...token, balance: Math.max(0, newBalance) }; // Ensure balance doesn't go negative
+          }
+          if (token.symbol === outputTokenSymbol) {
+            return { ...token, balance: (token.balance || 0) + amountReceived };
+          }
+          return token;
+        })
+      );
+      
+      const inputTokenForToast = displayTokens.find(t => t.symbol === inputTokenSymbol);
+      const outputTokenForToast = displayTokens.find(t => t.symbol === outputTokenSymbol);
+
       setIsExecuting(false);
       toast({
         title: "Swap Executed!",
-        description: `Successfully swapped tokens. Check your wallet for updates.`,
+        description: `Successfully swapped ${amountSwapped.toLocaleString(undefined, {maximumFractionDigits: inputTokenForToast?.decimals ?? 2})} ${inputTokenSymbol} for approx. ${amountReceived.toLocaleString(undefined, {maximumFractionDigits: outputTokenForToast?.decimals ?? 2})} ${outputTokenSymbol}. Balances updated.`,
         variant: "default",
         className: "bg-green-500 text-white dark:bg-green-600"
       });
       setRouteData(null); 
+      setCurrentSwapInput(null); // Clear stored input
     }, 2500);
   };
   
@@ -157,7 +187,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-8">
             <TokenSwapCard
-              tokens={mockTokens}
+              tokens={displayTokens} // Pass displayTokens
               onSubmit={handleFindRoute}
               isLoading={isLoadingRoute}
               walletConnected={walletConnected}
@@ -168,7 +198,7 @@ export default function HomePage() {
             <WalletInfoCard 
               walletConnected={walletConnected} 
               walletAddress={walletAddress} 
-              tokens={mockTokens} 
+              tokens={displayTokens} // Pass displayTokens
             />
           </div>
         </div>
@@ -184,7 +214,7 @@ export default function HomePage() {
           <RouteDetailsCard 
             routeOutput={routeData} 
             isLoading={isLoadingRoute} 
-            tokens={mockTokens} 
+            tokens={displayTokens} // Pass displayTokens
           />
         </div>
 
