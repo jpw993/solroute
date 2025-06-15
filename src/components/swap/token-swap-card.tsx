@@ -25,7 +25,7 @@ export function TokenSwapCard({ tokens, onSubmit, isLoading, walletConnected }: 
     defaultValues: {
       inputTokenId: '',
       outputTokenId: '',
-      amount: undefined,
+      amount: '', // Changed from undefined to empty string
     },
   });
 
@@ -97,6 +97,7 @@ export function TokenSwapCard({ tokens, onSubmit, isLoading, walletConnected }: 
                         type="number"
                         placeholder="0.00"
                         {...field}
+                        onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
                         disabled={isLoading || !walletConnected || !inputTokenId}
                         className="h-12 rounded-lg text-base pr-16"
                         step="any"
