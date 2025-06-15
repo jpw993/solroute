@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -35,14 +36,16 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   // Basic internal model: Simulate a direct swap
   const { inputToken, outputToken, amount } = input;
 
-  // Simulate some basic fee and slippage
-  const simulatedFees = amount * 0.003; // 0.3% fee
+  // Simulate a realistic fee (e.g., 0.25%) and slippage (e.g., 0.5%)
+  const realisticFeePercentage = 0.0025; // 0.25% fee for a DEX like Raydium
   const simulatedSlippage = 0.005; // 0.5% slippage
-  const estimatedOutputAmount = amount * (1 - 0.003 - 0.005); // Amount after fee and slippage
+
+  const simulatedFees = amount * realisticFeePercentage;
+  const estimatedOutputAmount = amount * (1 - realisticFeePercentage - simulatedSlippage);
 
   const route: FindOptimalRouteOutput['route'] = [
     {
-      dex: 'MockDEX (Internal)',
+      dex: 'Raydium', // Using a realistic DEX name
       tokenIn: inputToken,
       tokenOut: outputToken,
     },
