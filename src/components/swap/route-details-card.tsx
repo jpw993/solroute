@@ -5,7 +5,7 @@ import type { FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
 import type { Token } from '@/lib/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Zap, Info, TrendingUp, HelpCircle, GitCompareArrows } from 'lucide-react';
+import { ArrowRight, Zap, Info, TrendingUp, HelpCircle, GitCompareArrows, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import PathfindingAnimation from '@/components/animations/pathfinding-animation'; // Import the new animation component
 
@@ -135,7 +135,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
               <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground/80 mb-1">Est. Output (Single DEX)</span>
                 <span className="text-xl font-semibold text-muted-foreground">
-                  {bestSingleDexRoute.estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 6 })} {bestSingleDexRoute.tokenOut}
+                  {bestSingleDexRoute.estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {bestSingleDexRoute.tokenOut}
                 </span>
               </div>
               <div className="flex flex-col">
@@ -212,7 +212,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
             <div className="flex flex-col">
               <span className="text-sm text-muted-foreground mb-1">Est. Output (Recommended Route)</span>
               <span className="text-xl font-semibold text-green-600 dark:text-green-400">
-                {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 6 })} {multiHopOutputTokenSymbol}
+                {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {multiHopOutputTokenSymbol}
               </span>
             </div>
             <div className="flex flex-col">
@@ -234,3 +234,5 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
     </Card>
   );
 }
+
+    
