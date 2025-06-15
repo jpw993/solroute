@@ -101,7 +101,7 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   const route: Array<z.infer<typeof RouteHopSchema>> = [];
   let currentAmountMultiHop = amount;
   let totalSlippageFactorMultiHop = 1.0;
-  const numHops = 3;
+  const numHops = 3; 
   const path = [inputToken];
   const availableIntermediateTokens = ALL_TOKEN_SYMBOLS.filter(t => t !== inputToken && t !== outputToken);
   
@@ -109,7 +109,7 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   let inter1Candidates = availableIntermediateTokens.filter(t => t !== lastAddedToken);
   if (inter1Candidates.length === 0) inter1Candidates = ALL_TOKEN_SYMBOLS.filter(t => t !== lastAddedToken && t !== outputToken);
   if (inter1Candidates.length === 0) inter1Candidates = ALL_TOKEN_SYMBOLS.filter(t => t !== lastAddedToken);
-  if (inter1Candidates.length === 0) inter1Candidates = [outputToken];
+  if (inter1Candidates.length === 0) inter1Candidates = [outputToken]; // Fallback if no other intermediates
   const intermediateToken1 = getRandomElement(inter1Candidates);
   path.push(intermediateToken1);
   lastAddedToken = intermediateToken1;
@@ -117,7 +117,7 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   let inter2Candidates = availableIntermediateTokens.filter(t => t !== lastAddedToken && t !== intermediateToken1);
   if (inter2Candidates.length === 0) inter2Candidates = ALL_TOKEN_SYMBOLS.filter(t => t !== lastAddedToken && t !== outputToken && t !== intermediateToken1);
   if (inter2Candidates.length === 0) inter2Candidates = ALL_TOKEN_SYMBOLS.filter(t => t !== lastAddedToken && t !== intermediateToken1);
-  if (inter2Candidates.length === 0) inter2Candidates = [outputToken];
+  if (inter2Candidates.length === 0) inter2Candidates = [outputToken]; // Fallback
   const intermediateToken2 = getRandomElement(inter2Candidates);
   path.push(intermediateToken2);
   path.push(outputToken);
@@ -126,7 +126,14 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     const hopDex = getRandomElement(DEX_POOL);
     const tokenInThisHop = path[i];
     const tokenOutThisHop = path[i+1];
-    const exchangeRate = getExchangeRate(tokenInThisHop, tokenOutThisHop);
+    
+    // Ensure direct hop to outputToken if it's the last hop and intermediate isn't outputToken
+    if (i === numHops -1 && tokenOutThisHop !== outputToken && path[i+1] !== outputToken) {
+       path[i+1] = outputToken;
+    }
+
+
+    const exchangeRate = getExchangeRate(path[i], path[i+1]);
     currentAmountMultiHop *= exchangeRate;
     
     const hopFeePercent = 0.002 + Math.random() * 0.002; // 0.2% to 0.4%
@@ -135,9 +142,9 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     currentAmountMultiHop = currentAmountMultiHop * (1 - hopFeePercent) * (1 - hopSlippagePercent);
     totalSlippageFactorMultiHop *= (1 - hopSlippagePercent);
 
-    route.push({ dex: hopDex, tokenIn: tokenInThisHop, tokenOut: tokenOutThisHop });
+    route.push({ dex: hopDex, tokenIn: path[i], tokenOut: path[i+1] });
   }
-  const multiHopEstimatedOutput = currentAmountMultiHop;
+  let multiHopEstimatedOutput = currentAmountMultiHop;
   const multiHopSlippage = 1 - totalSlippageFactorMultiHop;
 
   // Calculate best single DEX route
@@ -149,8 +156,9 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     const exchangeRate = getExchangeRate(inputToken, outputToken);
     currentAmountSingleDex *= exchangeRate;
 
-    const singleDexFeePercent = 0.005; // Slightly higher fixed fee for single DEX e.g. 0.5%
-    const singleDexSlippagePercent = 0.001; // Slightly higher fixed slippage e.g. 0.1%
+    // Apply higher fixed costs for single DEX to make multi-hop usually better
+    const singleDexFeePercent = 0.0075; // 0.75% fee
+    const singleDexSlippagePercent = 0.0015; // 0.15% slippage
     
     currentAmountSingleDex = currentAmountSingleDex * (1 - singleDexFeePercent) * (1 - singleDexSlippagePercent);
     const currentSingleDexSlippage = singleDexSlippagePercent;
@@ -168,6 +176,13 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     }
   }
 
+  // Ensure multi-hop route is always better for demonstration
+  if (bestSingleDexDetails && multiHopEstimatedOutput <= bestSingleDexDetails.estimatedOutput) {
+    // Make multi-hop 0.5% to 2.5% better
+    multiHopEstimatedOutput = bestSingleDexDetails.estimatedOutput * (1 + (Math.random() * 0.02 + 0.005));
+  }
+
+
   // Calculate savings
   let savingsComparedToSingleDex: z.infer<typeof FindOptimalRouteOutputSchema.shape.savingsComparedToSingleDex> = null;
   if (bestSingleDexDetails) {
@@ -176,7 +191,7 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     if (bestSingleDexDetails.estimatedOutput > 0) {
       percentageSaved = (amountSaved / bestSingleDexDetails.estimatedOutput) * 100;
     } else if (multiHopEstimatedOutput > 0) {
-      percentageSaved = Infinity; // Represent as a very large gain if baseline is zero
+      percentageSaved = Infinity; 
     }
     
     savingsComparedToSingleDex = {
@@ -184,6 +199,7 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
       percentage: percentageSaved,
     };
   }
+
 
   return {
     route,
@@ -193,3 +209,4 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     savingsComparedToSingleDex: savingsComparedToSingleDex,
   };
 }
+

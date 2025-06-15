@@ -20,7 +20,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
   };
 
   const renderSavings = (savings: NonNullable<FindOptimalRouteOutput['savingsComparedToSingleDex']>, outputTokenSymbol: string) => {
-    const isPositiveSaving = savings.amount >= 0;
+    const isPositiveSaving = savings.amount >= 0; // Should always be true with new backend logic
     const savingTextClass = isPositiveSaving ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
     const percentageText = Number.isFinite(savings.percentage) ? `${savings.percentage.toFixed(2)}%` : "significantly";
     
@@ -28,7 +28,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
       <div className={cn(
         "mt-6 p-4 rounded-lg flex items-start text-sm",
         isPositiveSaving ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300" 
-                         : "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300"
+                         : "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300" // Fallback, but shouldn't be hit
       )}>
         <TrendingUp className={cn("h-5 w-5 mr-3 shrink-0 mt-0.5", savingTextClass)} />
         <div>
@@ -54,40 +54,40 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           <Skeleton className="h-4 w-4/5 rounded mt-1" />
         </CardHeader>
         <CardContent>
-          {/* Single DEX route skeleton */}
+          {/* Single DEX route skeleton - more muted */}
           <div className="mb-6 pb-6 border-b">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Best Single Exchange Route</h3>
-             <div className="flex flex-nowrap items-center gap-x-3 p-4 bg-card border rounded-lg overflow-x-auto shadow-sm">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/50 rounded-lg border shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full" /> <Skeleton className="h-6 w-20 rounded" /></div>
-                <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
-                  <Skeleton className="h-7 w-7 rounded" /> 
-                  <Skeleton className="h-5 w-16 rounded mt-1 bg-muted border border-border px-3 py-1 shadow-sm" />
+            <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route</h3>
+             <div className="flex flex-nowrap items-center gap-x-3 p-4 bg-muted/30 border border-muted/50 rounded-lg overflow-x-auto shadow-sm">
+                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg border border-muted/40 shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full bg-muted/40" /> <Skeleton className="h-6 w-20 rounded bg-muted/40" /></div>
+                <div className="flex flex-col items-center text-muted-foreground/50 mx-2 shrink-0">
+                  <Skeleton className="h-8 w-8 rounded bg-muted/40" /> 
+                  <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted/20 border border-muted/40 px-3.5 py-1.5 shadow-sm" />
                 </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/50 rounded-lg border shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full" /> <Skeleton className="h-6 w-20 rounded" /></div>
+                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg border border-muted/40 shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full bg-muted/40" /> <Skeleton className="h-6 w-20 rounded bg-muted/40" /></div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t">
-              <div><Skeleton className="h-4 w-28 rounded mb-1" /><Skeleton className="h-7 w-32 rounded" /></div>
-              <div><Skeleton className="h-4 w-28 rounded mb-1" /><Skeleton className="h-7 w-32 rounded" /></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t border-muted/50">
+              <div><Skeleton className="h-4 w-28 rounded bg-muted/40 mb-1" /><Skeleton className="h-7 w-32 rounded bg-muted/40" /></div>
+              <div><Skeleton className="h-4 w-28 rounded bg-muted/40 mb-1" /><Skeleton className="h-7 w-32 rounded bg-muted/40" /></div>
             </div>
           </div>
 
-          {/* Multi-hop route skeleton */}
+          {/* Multi-hop route skeleton - more prominent */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
-                <Skeleton className="inline-block h-4 w-4 mr-1.5 rounded" />
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                <Skeleton className="inline-block h-4 w-4 mr-1.5 rounded bg-primary/30" />
                 Optimal Multi-Hop Route
             </h3>
             <div className="flex flex-nowrap items-center gap-x-4 p-4 bg-secondary rounded-lg overflow-x-auto">
               {[...Array(3)].map((_, i) => (
                 <React.Fragment key={`skel-hop-${i}`}>
-                  <div className="flex items-center space-x-2 px-4 py-3 bg-muted/50 rounded-lg border shadow-sm shrink-0">
+                  <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg border shadow-sm shrink-0">
                     <Skeleton className="h-7 w-7 rounded-full" />
                     <Skeleton className="h-6 w-20 rounded" />
                   </div>
                   {i < 2 && (
                     <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
-                      <Skeleton className="h-7 w-7 rounded" />
-                      <Skeleton className="h-5 w-16 rounded mt-1 bg-muted border border-border px-3 py-1 shadow-sm" />
+                      <Skeleton className="h-8 w-8 rounded" />
+                      <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted border border-border px-3.5 py-1.5 shadow-sm" />
                     </div>
                   )}
                 </React.Fragment>
@@ -99,16 +99,15 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
             </div>
           </div>
           
-          {/* Savings skeleton */}
-          <div className="mt-6 p-4 bg-muted/50 border rounded-lg">
-            <Skeleton className="h-5 w-32 rounded mb-2" />
-            <Skeleton className="h-4 w-full rounded" />
-            <Skeleton className="h-4 w-3/4 rounded mt-1" />
+          <div className="mt-6 p-4 bg-green-50/50 border border-green-200/50 rounded-lg">
+            <Skeleton className="h-5 w-32 rounded bg-green-200/50 mb-2" />
+            <Skeleton className="h-4 w-full rounded bg-green-200/50" />
+            <Skeleton className="h-4 w-3/4 rounded bg-green-200/50 mt-1" />
           </div>
-          <div className="mt-6 p-3 bg-muted/50 border rounded-lg">
-            <Skeleton className="h-5 w-5 rounded-full inline-block mr-2" />
-            <Skeleton className="h-4 w-full rounded inline-block" />
-            <Skeleton className="h-4 w-3/4 rounded mt-1 inline-block" />
+          <div className="mt-6 p-3 bg-blue-50/50 border border-blue-200/50 rounded-lg">
+            <Skeleton className="h-5 w-5 rounded-full inline-block mr-2 bg-blue-200/50" />
+            <Skeleton className="h-4 w-full rounded inline-block bg-blue-200/50" />
+            <Skeleton className="h-4 w-3/4 rounded mt-1 inline-block bg-blue-200/50" />
           </div>
         </CardContent>
       </Card>
@@ -149,38 +148,38 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Best Single DEX route */}
+        {/* Best Single DEX route - de-emphasized */}
         {bestSingleDexRoute && (
-          <div className="mb-6 pb-6 border-b">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Best Single Exchange Route</h3>
-            <div className="flex flex-nowrap items-center gap-x-4 text-base bg-card border p-4 rounded-lg overflow-x-auto shadow-sm">
+          <div className="mb-6 pb-6 border-b border-muted/50">
+            <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route (Alternative)</h3>
+            <div className="flex flex-nowrap items-center gap-x-3 text-base bg-muted/30 border border-muted/50 p-4 rounded-lg overflow-x-auto shadow-sm">
                 {getTokenBySymbol(bestSingleDexRoute.tokenIn) && (
-                    <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
-                        <Image src={getTokenBySymbol(bestSingleDexRoute.tokenIn)!.iconSrc} alt={`${bestSingleDexRoute.tokenIn} icon`} width={28} height={28} className="rounded-full" data-ai-hint={`${bestSingleDexRoute.tokenIn.toLowerCase()} logo`} />
-                        <span className="text-lg font-medium text-foreground">{bestSingleDexRoute.tokenIn}</span>
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg shadow-sm border border-muted/40 shrink-0">
+                        <Image src={getTokenBySymbol(bestSingleDexRoute.tokenIn)!.iconSrc} alt={`${bestSingleDexRoute.tokenIn} icon`} width={24} height={24} className="rounded-full opacity-75" data-ai-hint={`${bestSingleDexRoute.tokenIn.toLowerCase()} logo`} />
+                        <span className="text-lg font-medium text-muted-foreground">{bestSingleDexRoute.tokenIn}</span>
                     </div>
                 )}
-                <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
+                <div className="flex flex-col items-center text-muted-foreground/50 mx-2 shrink-0">
                     <ArrowRight className="h-8 w-8" />
-                    <span className="text-base mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">{bestSingleDexRoute.dex}</span>
+                    <span className="text-base mt-1.5 bg-muted/20 border border-muted/40 px-3.5 py-1.5 rounded-md shadow-sm font-medium">{bestSingleDexRoute.dex}</span>
                 </div>
                 {getTokenBySymbol(bestSingleDexRoute.tokenOut) && (
-                     <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
-                        <Image src={getTokenBySymbol(bestSingleDexRoute.tokenOut)!.iconSrc} alt={`${bestSingleDexRoute.tokenOut} icon`} width={28} height={28} className="rounded-full" data-ai-hint={`${bestSingleDexRoute.tokenOut.toLowerCase()} logo`} />
-                        <span className="text-lg font-medium text-foreground">{bestSingleDexRoute.tokenOut}</span>
+                     <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg shadow-sm border border-muted/40 shrink-0">
+                        <Image src={getTokenBySymbol(bestSingleDexRoute.tokenOut)!.iconSrc} alt={`${bestSingleDexRoute.tokenOut} icon`} width={24} height={24} className="rounded-full opacity-75" data-ai-hint={`${bestSingleDexRoute.tokenOut.toLowerCase()} logo`} />
+                        <span className="text-lg font-medium text-muted-foreground">{bestSingleDexRoute.tokenOut}</span>
                     </div>
                 )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t border-muted/50">
               <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground mb-1">Est. Output (Single DEX)</span>
-                <span className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                <span className="text-sm text-muted-foreground/80 mb-1">Est. Output (Single DEX)</span>
+                <span className="text-xl font-semibold text-muted-foreground">
                   {bestSingleDexRoute.estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 6 })} {bestSingleDexRoute.tokenOut}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground mb-1">Est. Slippage (Single DEX)</span>
-                <span className="text-xl font-semibold text-foreground">
+                <span className="text-sm text-muted-foreground/80 mb-1">Est. Slippage (Single DEX)</span>
+                <span className="text-xl font-semibold text-muted-foreground">
                   {(bestSingleDexRoute.slippage * 100).toFixed(3)}%
                 </span>
               </div>
@@ -188,11 +187,11 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           </div>
         )}
 
-        {/* Multi-hop route */}
+        {/* Multi-hop route - more prominent */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
             <Zap className="inline-block h-4 w-4 mr-1.5 relative -top-px text-primary" />
-            Optimal Multi-Hop Route
+            Optimal Multi-Hop Route (Recommended)
           </h3>
           {route.length > 0 ? (
             <div className="flex flex-nowrap items-center gap-x-4 text-base bg-secondary p-4 rounded-lg overflow-x-auto">
@@ -207,26 +206,26 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
                       {tokenInDetails && (
                         <Image src={tokenInDetails.iconSrc} alt={`${tokenInDetails.name} icon`} width={28} height={28} className="rounded-full" data-ai-hint={`${tokenInDetails.symbol.toLowerCase()} logo`} />
                       )}
-                      <span className="text-lg font-medium text-primary">{hop.tokenIn}</span>
+                      <span className="text-xl font-medium text-primary">{hop.tokenIn}</span>
                     </div>
 
                     {index < route.length -1 && ( 
-                      <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
+                      <div className="flex flex-col items-center text-foreground mx-2 shrink-0">
                         <ArrowRight className="h-8 w-8" />
-                        <span className="text-base mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">{hop.dex}</span>
+                        <span className="text-lg mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">{hop.dex}</span>
                       </div>
                     )}
                     {isFinalTokenInRoute && index > 0 && ( 
-                       <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
+                       <div className="flex flex-col items-center text-foreground mx-2 shrink-0">
                         <ArrowRight className="h-8 w-8" />
-                        <span className="text-base mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">{hop.dex}</span>
+                        <span className="text-lg mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">{hop.dex}</span>
                       </div>
                     )}
 
                     {isFinalTokenInRoute && tokenOutDetailsForDisplay && (
                       <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
                         <Image src={tokenOutDetailsForDisplay.iconSrc} alt={`${tokenOutDetailsForDisplay.name} icon`} width={28} height={28} className="rounded-full" data-ai-hint={`${tokenOutDetailsForDisplay.symbol.toLowerCase()} logo`} />
-                        <span className="text-lg font-medium text-primary">{hop.tokenOut}</span>
+                        <span className="text-xl font-medium text-primary">{hop.tokenOut}</span>
                       </div>
                     )}
                   </React.Fragment>
@@ -237,27 +236,27 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
              <div className="flex flex-nowrap items-center gap-x-4 text-base bg-secondary p-4 rounded-lg overflow-x-auto">
                 <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
                   {getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "")!.iconSrc} alt="token in icon" width={28} height={28} className="rounded-full" />}
-                  <span className="text-lg font-medium text-primary">{routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn}</span>
+                  <span className="text-xl font-medium text-primary">{routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn}</span>
                 </div>
-                <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
+                <div className="flex flex-col items-center text-foreground mx-2 shrink-0">
                   <ArrowRight className="h-8 w-8" />
-                  <span className="text-base mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">Direct</span>
+                  <span className="text-lg mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">Direct</span>
                 </div>
                 <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
                    {getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "")!.iconSrc} alt="token out icon" width={28} height={28} className="rounded-full" />}
-                  <span className="text-lg font-medium text-primary">{routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut}</span>
+                  <span className="text-xl font-medium text-primary">{routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut}</span>
                 </div>
               </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t">
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground mb-1">Est. Output (Multi-Hop)</span>
+              <span className="text-sm text-muted-foreground mb-1">Est. Output (Recommended Route)</span>
               <span className="text-xl font-semibold text-green-600 dark:text-green-400">
                 {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 6 })} {multiHopOutputTokenSymbol}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground mb-1">Est. Slippage (Multi-Hop)</span>
+              <span className="text-sm text-muted-foreground mb-1">Est. Slippage (Recommended Route)</span>
               <span className="text-xl font-semibold text-foreground">
                 {(slippage * 100).toFixed(3)}%
               </span>
