@@ -1,14 +1,13 @@
 'use server';
 
 /**
- * @fileOverview Finds the optimal route for swapping tokens using AI analysis of various DEXes.
+ * @fileOverview Finds a basic route for swapping tokens using a simple internal model.
  *
- * - findOptimalRoute - A function that handles the process of finding the optimal token swap route.
+ * - findOptimalRoute - A function that handles the process of finding a token swap route.
  * - FindOptimalRouteInput - The input type for the findOptimalRoute function.
  * - FindOptimalRouteOutput - The return type for the findOptimalRoute function.
  */
 
-import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const FindOptimalRouteInputSchema = z.object({
@@ -33,35 +32,26 @@ const FindOptimalRouteOutputSchema = z.object({
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
 
 export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<FindOptimalRouteOutput> {
-  return findOptimalRouteFlow(input);
+  // Basic internal model: Simulate a direct swap
+  const { inputToken, outputToken, amount } = input;
+
+  // Simulate some basic fee and slippage
+  const simulatedFees = amount * 0.003; // 0.3% fee
+  const simulatedSlippage = 0.005; // 0.5% slippage
+  const estimatedOutputAmount = amount * (1 - 0.003 - 0.005); // Amount after fee and slippage
+
+  const route: FindOptimalRouteOutput['route'] = [
+    {
+      dex: 'MockDEX (Internal)',
+      tokenIn: inputToken,
+      tokenOut: outputToken,
+    },
+  ];
+
+  return {
+    route,
+    estimatedOutput: estimatedOutputAmount,
+    fees: simulatedFees,
+    slippage: simulatedSlippage,
+  };
 }
-
-const prompt = ai.definePrompt({
-  name: 'findOptimalRoutePrompt',
-  input: {schema: FindOptimalRouteInputSchema},
-  output: {schema: FindOptimalRouteOutputSchema},
-  prompt: `You are an expert in decentralized exchanges (DEXes) on Solana.
-  Given an input token, an output token, and an amount, you will find the optimal route for swapping the tokens.
-  Consider factors such as slippage, fees, and liquidity across various DEXes.
-  Provide the route as a series of hops, including the DEX used for each hop, the input token, and the output token.
-  Also, provide the estimated output amount, fees, and slippage for the entire route.
-
-  Input Token: {{{inputToken}}}
-  Output Token: {{{outputToken}}}
-  Amount: {{{amount}}}
-
-  Respond in a valid JSON format.
-  `,
-});
-
-const findOptimalRouteFlow = ai.defineFlow(
-  {
-    name: 'findOptimalRouteFlow',
-    inputSchema: FindOptimalRouteInputSchema,
-    outputSchema: FindOptimalRouteOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
