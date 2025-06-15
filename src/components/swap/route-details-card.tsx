@@ -5,12 +5,12 @@ import type { FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
 import type { Token } from '@/lib/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Zap, Percent, Info } from 'lucide-react';
+import { ArrowRight, Zap, Info } from 'lucide-react';
 
 type RouteDetailsCardProps = {
   routeOutput: FindOptimalRouteOutput | null;
   isLoading: boolean;
-  tokens: Token[]; // Added to access token icons
+  tokens: Token[];
 };
 
 export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetailsCardProps) {
@@ -28,17 +28,17 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
         <CardContent>
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Route Details</h3>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3 bg-secondary rounded-lg">
-              {[...Array(3)].map((_, i) => ( // Skeleton for a 3-hop route (e.g., T1 -> D1 -> T2 -> D2 -> T3)
+            <div className="flex flex-nowrap items-center gap-x-2 p-3 bg-secondary rounded-lg overflow-x-auto">
+              {[...Array(3)].map((_, i) => ( 
                 <React.Fragment key={`skel-hop-${i}`}>
-                  <div className="flex items-center space-x-1.5 p-2 bg-muted/50 rounded-md border">
+                  <div className="flex items-center space-x-1.5 px-2 py-1 bg-muted/50 rounded-md border">
                     <Skeleton className="h-5 w-5 rounded-full" />
                     <Skeleton className="h-4 w-12 rounded" />
                   </div>
-                  {i < 2 && ( // For 2 DEX/arrow segments
-                    <div className="flex flex-col items-center text-muted-foreground mx-1">
-                      <Skeleton className="h-5 w-5 rounded" /> {/* Arrow placeholder */}
-                      <Skeleton className="h-3 w-10 rounded mt-1" /> {/* DEX placeholder */}
+                  {i < 2 && ( 
+                    <div className="flex flex-col items-center text-muted-foreground mx-0.5 shrink-0">
+                      <Skeleton className="h-5 w-5 rounded" /> 
+                      <Skeleton className="h-3 w-10 rounded mt-1" /> 
                     </div>
                   )}
                 </React.Fragment>
@@ -66,7 +66,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
   }
 
   if (!routeOutput) {
-    return null; // Don't render if no route data and not loading
+    return null; 
   }
 
   const { route, estimatedOutput, slippage } = routeOutput;
@@ -87,14 +87,18 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Route Details</h3>
           {route.length > 0 ? (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm md:text-base bg-secondary p-3 rounded-lg">
+            <div className="flex flex-nowrap items-center gap-x-2 text-sm bg-secondary p-3 rounded-lg overflow-x-auto">
               {route.map((hop, index) => {
                 const tokenInDetails = getTokenBySymbol(hop.tokenIn);
-                const tokenOutDetails = index === route.length - 1 ? getTokenBySymbol(hop.tokenOut) : null;
+                // The final tokenOut of the *last hop* is the actual end of the route.
+                // For intermediate hops, hop.tokenOut is just the input for the *next* hop.
+                // We only want to distinctively style the very last token in the entire route sequence.
+                const isFinalTokenInRoute = index === route.length - 1;
+                const tokenOutDetailsForDisplay = isFinalTokenInRoute ? getTokenBySymbol(hop.tokenOut) : null;
 
                 return (
                   <React.Fragment key={index}>
-                    <div className="flex items-center space-x-1.5 p-2 bg-background/70 rounded-md shadow-sm border">
+                    <div className="flex items-center space-x-1.5 px-2 py-1 bg-background/70 rounded-md shadow-sm border shrink-0">
                       {tokenInDetails && (
                         <Image
                           src={tokenInDetails.iconSrc}
@@ -108,22 +112,33 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
                       <span className="font-medium text-primary">{hop.tokenIn}</span>
                     </div>
 
-                    {index < route.length && ( // Don't show arrow/dex after the final token
-                      <div className="flex flex-col items-center text-muted-foreground mx-1">
+                    {index < route.length -1 && ( // Show arrow and DEX for all but the last hop connection
+                      <div className="flex flex-col items-center text-muted-foreground mx-0.5 shrink-0">
+                        <ArrowRight className="h-5 w-5" />
+                        <span className="text-xs mt-0.5 bg-accent/20 text-accent-foreground px-1.5 py-0.5 rounded-sm shadow-sm">{hop.dex}</span>
+                      </div>
+                    )}
+                     {/* 
+                      If it's the last hop, we need to display its DEX information BEFORE the final token.
+                      The loop structure means the DEX for the last hop (hop connecting to final token) is inside the last iteration.
+                    */}
+                    {isFinalTokenInRoute && index > 0 && ( // Ensure there was a previous hop to show a DEX for
+                       <div className="flex flex-col items-center text-muted-foreground mx-0.5 shrink-0">
                         <ArrowRight className="h-5 w-5" />
                         <span className="text-xs mt-0.5 bg-accent/20 text-accent-foreground px-1.5 py-0.5 rounded-sm shadow-sm">{hop.dex}</span>
                       </div>
                     )}
 
-                    {index === route.length - 1 && tokenOutDetails && (
-                      <div className="flex items-center space-x-1.5 p-2 bg-background/70 rounded-md shadow-sm border">
+
+                    {isFinalTokenInRoute && tokenOutDetailsForDisplay && (
+                      <div className="flex items-center space-x-1.5 px-2 py-1 bg-background/70 rounded-md shadow-sm border shrink-0">
                         <Image
-                          src={tokenOutDetails.iconSrc}
-                          alt={`${tokenOutDetails.name} icon`}
+                          src={tokenOutDetailsForDisplay.iconSrc}
+                          alt={`${tokenOutDetailsForDisplay.name} icon`}
                           width={20}
                           height={20}
                           className="rounded-full"
-                          data-ai-hint={`${tokenOutDetails.symbol.toLowerCase()} logo`}
+                          data-ai-hint={`${tokenOutDetailsForDisplay.symbol.toLowerCase()} logo`}
                         />
                         <span className="font-medium text-primary">{hop.tokenOut}</span>
                       </div>
