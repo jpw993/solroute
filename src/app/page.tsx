@@ -162,14 +162,6 @@ export default function HomePage() {
               walletAddress={walletAddress} 
               tokens={mockTokens} 
             />
-            <SwapConfirmationCard
-              onSimulate={handleSimulateSwap}
-              onExecute={handleExecuteSwap}
-              isSimulating={isSimulating}
-              isExecuting={isExecuting}
-              isRouteAvailable={!!routeData && !isLoadingRoute && !routeError}
-              walletConnected={walletConnected}
-            />
           </div>
         </div>
         
@@ -186,6 +178,17 @@ export default function HomePage() {
             isLoading={isLoadingRoute} 
             tokens={mockTokens} 
           />
+        </div>
+
+        <div className="mt-8">
+           <SwapConfirmationCard
+              onSimulate={handleSimulateSwap}
+              onExecute={handleExecuteSwap}
+              isSimulating={isSimulating}
+              isExecuting={isExecuting}
+              isRouteAvailable={!!routeData && !isLoadingRoute && !routeError}
+              walletConnected={walletConnected}
+            />
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t">
