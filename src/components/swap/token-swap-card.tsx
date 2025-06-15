@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { TokenSelect } from './token-select';
-import { ArrowDownUp, Search, Loader2 } from 'lucide-react';
+import { ArrowDownUp, Search, Loader2, ArrowRightLeft } from 'lucide-react';
 
 type TokenSwapCardProps = {
   tokens: Token[];
@@ -46,7 +46,10 @@ export function TokenSwapCard({ tokens, onSubmit, isLoading, walletConnected }: 
   return (
     <Card className="w-full shadow-xl">
       <CardHeader>
-        <CardTitle className="text-2xl font-headline">Swap Tokens</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-2xl font-headline">
+          <ArrowRightLeft className="h-6 w-6 text-primary" />
+          Swap Tokens
+        </CardTitle>
         <CardDescription>Select tokens and amount to find the best route.</CardDescription>
       </CardHeader>
       <CardContent>
