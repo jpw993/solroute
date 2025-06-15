@@ -9,5 +9,4 @@ export type Wallet = {
 
 // You can also re-export types from other modules for easier access
 export type { Token } from '@/lib/tokens';
-// NOTE: FindOptimalRouteOutput no longer includes 'fees'
 export type { FindOptimalRouteInput, FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
