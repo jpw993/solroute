@@ -1,6 +1,6 @@
 # SolRoute - Solana DEX Router
 
-SolRoute is a Next.js application designed to find the optimal route for swapping tokens on the Solana blockchain. It utilizes an AI-powered flow to analyze potential paths and presents a user-friendly interface for exploring swap options and (mock) executing them.
+SolRoute is a Next.js application designed to find the optimal route for swapping tokens on the Solana blockchain. It utilizes an AI-powered flow to analyze potential paths and presents a user-friendly interface for exploring swap routes and executing them.
 
 This project was developed in Firebase Studio.
 
