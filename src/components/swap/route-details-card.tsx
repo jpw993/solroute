@@ -5,7 +5,7 @@ import type { FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
 import type { Token } from '@/lib/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Zap, Info, ShieldCheck, TrendingUp, HelpCircle, GitCompareArrows } from 'lucide-react';
+import { ArrowRight, Zap, Info, ShieldCheck, TrendingUp, HelpCircle, GitCompareArrows, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type RouteDetailsCardProps = {
@@ -20,7 +20,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
   };
 
   const renderSavings = (savings: NonNullable<FindOptimalRouteOutput['savingsComparedToSingleDex']>, outputTokenSymbol: string) => {
-    const isPositiveSaving = savings.amount >= 0; // Should always be true with new backend logic
+    const isPositiveSaving = savings.amount >= 0;
     const savingTextClass = isPositiveSaving ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400";
     const percentageText = Number.isFinite(savings.percentage) ? `${savings.percentage.toFixed(2)}%` : "significantly";
     
@@ -28,7 +28,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
       <div className={cn(
         "mt-6 p-4 rounded-lg flex items-start text-sm",
         isPositiveSaving ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300" 
-                         : "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300" // Fallback, but shouldn't be hit
+                         : "bg-red-50 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300"
       )}>
         <TrendingUp className={cn("h-5 w-5 mr-3 shrink-0 mt-0.5", savingTextClass)} />
         <div>
@@ -48,15 +48,15 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
 
   if (isLoading) {
     return (
-      <Card className="shadow-lg mt-6 animate-pulse">
+      <Card className="shadow-lg mt-6">
         <CardHeader>
           <Skeleton className="h-7 w-3/5 rounded" />
           <Skeleton className="h-4 w-4/5 rounded mt-1" />
         </CardHeader>
         <CardContent>
           {/* Single DEX route skeleton - more muted */}
-          <div className="mb-6 pb-6 border-b">
-            <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route</h3>
+          <div className="mb-6 pb-6 border-b border-muted/50">
+            <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route (Alternative)</h3>
              <div className="flex flex-nowrap items-center gap-x-3 p-4 bg-muted/30 border border-muted/50 rounded-lg overflow-x-auto shadow-sm">
                 <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg border border-muted/40 shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full bg-muted/40" /> <Skeleton className="h-6 w-20 rounded bg-muted/40" /></div>
                 <div className="flex flex-col items-center text-muted-foreground/50 mx-2 shrink-0">
@@ -73,9 +73,9 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
 
           {/* Multi-hop route skeleton - more prominent */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                <Skeleton className="inline-block h-4 w-4 mr-1.5 rounded bg-primary/30" />
-                Optimal Multi-Hop Route
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-primary" />
+                <span>Searching for Optimal Multi-Hop Route...</span>
             </h3>
             <div className="flex flex-nowrap items-center gap-x-4 p-4 bg-secondary rounded-lg overflow-x-auto">
               {[...Array(3)].map((_, i) => (
@@ -235,7 +235,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           ) : (
              <div className="flex flex-nowrap items-center gap-x-4 text-base bg-secondary p-4 rounded-lg overflow-x-auto">
                 <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
-                  {getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "")!.iconSrc} alt="token in icon" width={28} height={28} className="rounded-full" />}
+                  {getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn || "")!.iconSrc} alt="token in icon" width={28} height={28} className="rounded-full" data-ai-hint="token logo"/>}
                   <span className="text-xl font-medium text-primary">{routeOutput.route[0]?.tokenIn || bestSingleDexRoute?.tokenIn}</span>
                 </div>
                 <div className="flex flex-col items-center text-foreground mx-2 shrink-0">
@@ -243,7 +243,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
                   <span className="text-lg mt-1.5 bg-muted border border-border px-3.5 py-1.5 rounded-md shadow-sm font-medium">Direct</span>
                 </div>
                 <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg shadow-sm border shrink-0">
-                   {getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "")!.iconSrc} alt="token out icon" width={28} height={28} className="rounded-full" />}
+                   {getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "") && <Image src={getTokenBySymbol(routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut || "")!.iconSrc} alt="token out icon" width={28} height={28} className="rounded-full" data-ai-hint="token logo"/>}
                   <span className="text-xl font-medium text-primary">{routeOutput.route[0]?.tokenOut || bestSingleDexRoute?.tokenOut}</span>
                 </div>
               </div>
@@ -275,3 +275,5 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
     </Card>
   );
 }
+
+    
