@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -25,7 +26,7 @@ export function TokenSwapCard({ tokens, onSubmit, isLoading, walletConnected }: 
     defaultValues: {
       inputTokenId: '',
       outputTokenId: '',
-      amount: '', // Changed from undefined to empty string
+      amount: '', // Keep this as good practice
     },
   });
 
@@ -96,8 +97,11 @@ export function TokenSwapCard({ tokens, onSubmit, isLoading, walletConnected }: 
                        <Input
                         type="number"
                         placeholder="0.00"
-                        {...field}
+                        name={field.name}
+                        value={field.value ?? ''} // Ensure value is never undefined
                         onChange={(e) => field.onChange(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
                         disabled={isLoading || !walletConnected || !inputTokenId}
                         className="h-12 rounded-lg text-base pr-16"
                         step="any"
