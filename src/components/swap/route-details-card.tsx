@@ -37,7 +37,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           <p>
             {isPositiveSaving ? "Using the multi-hop route, you get an extra " : "The single DEX route is better by "}
             <strong className={savingTextClass}>
-              {Math.abs(savings.amount).toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {outputTokenSymbol}
+              {Math.abs(savings.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {outputTokenSymbol}
             </strong>
             {` (${percentageText}${isPositiveSaving ? " more" : " less"})`} compared to the best single DEX swap.
           </p>
@@ -135,7 +135,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
               <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground/80 mb-1">Est. Output (Single DEX)</span>
                 <span className="text-xl font-semibold text-muted-foreground">
-                  {bestSingleDexRoute.estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {bestSingleDexRoute.tokenOut}
+                  {bestSingleDexRoute.estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bestSingleDexRoute.tokenOut}
                 </span>
               </div>
               <div className="flex flex-col">
@@ -212,7 +212,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
             <div className="flex flex-col">
               <span className="text-sm text-muted-foreground mb-1">Est. Output (Recommended Route)</span>
               <span className="text-xl font-semibold text-green-600 dark:text-green-400">
-                {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })} {multiHopOutputTokenSymbol}
+                {estimatedOutput.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {multiHopOutputTokenSymbol}
               </span>
             </div>
             <div className="flex flex-col">
@@ -234,5 +234,7 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
     </Card>
   );
 }
+
+    
 
     
