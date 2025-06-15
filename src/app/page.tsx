@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -150,18 +151,6 @@ export default function HomePage() {
               isLoading={isLoadingRoute}
               walletConnected={walletConnected}
             />
-            {routeError && !isLoadingRoute && (
-              <Alert variant="destructive" className="shadow-md">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Error Finding Route</AlertTitle>
-                <AlertDescription>{routeError}</AlertDescription>
-              </Alert>
-            )}
-            <RouteDetailsCard 
-              routeOutput={routeData} 
-              isLoading={isLoadingRoute} 
-              tokens={mockTokens} 
-            />
           </div>
 
           <div className="lg:col-span-1 space-y-8">
@@ -179,6 +168,21 @@ export default function HomePage() {
               walletConnected={walletConnected}
             />
           </div>
+        </div>
+        
+        <div className="mt-8">
+          {routeError && !isLoadingRoute && (
+            <Alert variant="destructive" className="shadow-md mb-8">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Error Finding Route</AlertTitle>
+              <AlertDescription>{routeError}</AlertDescription>
+            </Alert>
+          )}
+          <RouteDetailsCard 
+            routeOutput={routeData} 
+            isLoading={isLoadingRoute} 
+            tokens={mockTokens} 
+          />
         </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t">
