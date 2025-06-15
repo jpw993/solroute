@@ -25,7 +25,6 @@ export default function HomePage() {
   const [routeData, setRouteData] = useState<FindOptimalRouteOutput | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
 
-  const [isSimulating, setIsSimulating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   
   useEffect(() => {
@@ -108,19 +107,6 @@ export default function HomePage() {
     }
   };
 
-  const handleSimulateSwap = () => {
-    if (!routeData) return;
-    setIsSimulating(true);
-    setTimeout(() => {
-      setIsSimulating(false);
-      toast({
-        title: "Swap Simulated",
-        description: `Expected output: ${routeData.estimatedOutput.toFixed(4)} ${routeData.route[routeData.route.length-1].tokenOut}.`,
-        variant: "default",
-      });
-    }, 1500);
-  };
-
   const handleExecuteSwap = () => {
      if (!routeData) return;
     setIsExecuting(true);
@@ -182,9 +168,7 @@ export default function HomePage() {
 
         <div className="mt-8">
            <SwapConfirmationCard
-              onSimulate={handleSimulateSwap}
               onExecute={handleExecuteSwap}
-              isSimulating={isSimulating}
               isExecuting={isExecuting}
               isRouteAvailable={!!routeData && !isLoadingRoute && !routeError}
               walletConnected={walletConnected}
