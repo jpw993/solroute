@@ -5,8 +5,9 @@ import type { FindOptimalRouteOutput } from '@/ai/flows/optimal-route-finder';
 import type { Token } from '@/lib/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Zap, Info, ShieldCheck, TrendingUp, HelpCircle, GitCompareArrows, Loader2 } from 'lucide-react';
+import { ArrowRight, Zap, Info, TrendingUp, HelpCircle, GitCompareArrows } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import PathfindingAnimation from '@/components/animations/pathfinding-animation'; // Import the new animation component
 
 type RouteDetailsCardProps = {
   routeOutput: FindOptimalRouteOutput | null;
@@ -45,69 +46,30 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
     );
   };
 
-
   if (isLoading) {
     return (
       <Card className="shadow-lg mt-6">
         <CardHeader>
-          <Skeleton className="h-7 w-3/5 rounded" />
-          <Skeleton className="h-4 w-4/5 rounded mt-1" />
+           <CardTitle className="flex items-center gap-2 text-xl font-headline">
+             <GitCompareArrows className="h-6 w-6 text-primary" />
+            Swap Route Analysis
+          </CardTitle>
+          <CardDescription>
+            Searching for the best routes for your swap...
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {/* Single DEX route skeleton - more muted */}
-          <div className="mb-6 pb-6 border-b border-muted/50">
-            <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route (Alternative)</h3>
-             <div className="flex flex-nowrap items-center gap-x-3 p-4 bg-muted/30 border border-muted/50 rounded-lg overflow-x-auto shadow-sm">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg border border-muted/40 shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full bg-muted/40" /> <Skeleton className="h-6 w-20 rounded bg-muted/40" /></div>
-                <div className="flex flex-col items-center text-muted-foreground/50 mx-2 shrink-0">
-                  <Skeleton className="h-8 w-8 rounded bg-muted/40" /> 
-                  <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted/20 border border-muted/40 px-3.5 py-1.5 shadow-sm" />
-                </div>
-                <div className="flex items-center space-x-2 px-3 py-2 bg-muted/20 rounded-lg border border-muted/40 shadow-sm shrink-0"><Skeleton className="h-7 w-7 rounded-full bg-muted/40" /> <Skeleton className="h-6 w-20 rounded bg-muted/40" /></div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t border-muted/50">
-              <div><Skeleton className="h-4 w-28 rounded bg-muted/40 mb-1" /><Skeleton className="h-7 w-32 rounded bg-muted/40" /></div>
-              <div><Skeleton className="h-4 w-28 rounded bg-muted/40 mb-1" /><Skeleton className="h-7 w-32 rounded bg-muted/40" /></div>
-            </div>
-          </div>
-
-          {/* Multi-hop route skeleton - more prominent */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider flex items-center">
-                <Loader2 className="h-5 w-5 mr-2 animate-spin text-primary" /> {/* Increased icon size */}
-                <span>Searching for Optimal Multi-Hop Route...</span>
-            </h3>
-            <div className="flex flex-nowrap items-center gap-x-4 p-4 bg-secondary rounded-lg overflow-x-auto">
-              {[...Array(3)].map((_, i) => (
-                <React.Fragment key={`skel-hop-${i}`}>
-                  <div className="flex items-center space-x-3 px-4 py-3 bg-background/70 rounded-lg border shadow-sm shrink-0">
-                    <Skeleton className="h-7 w-7 rounded-full" />
-                    <Skeleton className="h-6 w-20 rounded" />
-                  </div>
-                  {i < 2 && (
-                    <div className="flex flex-col items-center text-muted-foreground mx-2 shrink-0">
-                      <Skeleton className="h-8 w-8 rounded" /> {/* Arrow skeleton */}
-                      <Skeleton className="h-6 w-20 rounded mt-1.5 bg-muted border border-border px-3.5 py-1.5 shadow-sm" /> {/* DEX skeleton */}
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 pt-4 mt-4 border-t">
-              <div><Skeleton className="h-4 w-28 rounded mb-1" /><Skeleton className="h-7 w-32 rounded" /></div>
-              <div><Skeleton className="h-4 w-28 rounded mb-1" /><Skeleton className="h-7 w-32 rounded" /></div>
-            </div>
-          </div>
+        <CardContent className="pt-2">
+          <PathfindingAnimation />
           
-          <div className="mt-6 p-4 bg-green-50/50 border border-green-200/50 rounded-lg">
-            <Skeleton className="h-5 w-32 rounded bg-green-200/50 mb-2" />
-            <Skeleton className="h-4 w-full rounded bg-green-200/50" />
-            <Skeleton className="h-4 w-3/4 rounded bg-green-200/50 mt-1" />
-          </div>
-          <div className="mt-6 p-3 bg-blue-50/50 border border-blue-200/50 rounded-lg">
-            <Skeleton className="h-5 w-5 rounded-full inline-block mr-2 bg-blue-200/50" />
-            <Skeleton className="h-4 w-full rounded inline-block bg-blue-200/50" />
-            <Skeleton className="h-4 w-3/4 rounded mt-1 inline-block bg-blue-200/50" />
+          <div className="mt-4 pt-4 border-t border-muted/50">
+            <h3 className="text-xs font-semibold text-muted-foreground/60 mb-2 uppercase tracking-wider">Also checking single exchange alternatives...</h3>
+             <div className="flex flex-nowrap items-center gap-x-3 p-3 bg-muted/20 border border-muted/30 rounded-lg overflow-x-auto">
+                <Skeleton className="h-7 w-7 rounded-full bg-muted/30 shrink-0" /> 
+                <Skeleton className="h-5 w-16 rounded bg-muted/30 shrink-0" />
+                <Skeleton className="h-6 w-6 rounded bg-muted/30 mx-1 shrink-0" /> {/* Arrow */}
+                <Skeleton className="h-5 w-16 rounded bg-muted/30 shrink-0" />
+                <Skeleton className="h-7 w-7 rounded-full bg-muted/30 shrink-0" />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -148,7 +110,6 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Best Single DEX route - de-emphasized */}
         {bestSingleDexRoute && (
           <div className="mb-6 pb-6 border-b border-muted/50">
             <h3 className="text-sm font-semibold text-muted-foreground/70 mb-3 uppercase tracking-wider">Best Single Exchange Route (Alternative)</h3>
@@ -187,7 +148,6 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           </div>
         )}
 
-        {/* Multi-hop route - more prominent */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
             <Zap className="inline-block h-4 w-4 mr-1.5 relative -top-px text-primary" />
@@ -264,7 +224,6 @@ export function RouteDetailsCard({ routeOutput, isLoading, tokens }: RouteDetail
           </div>
         </div>
         
-        {/* Savings Comparison */}
         {savingsComparedToSingleDex && bestSingleDexRoute && renderSavings(savingsComparedToSingleDex, bestSingleDexRoute.tokenOut)}
 
         <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start text-sm text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300">
