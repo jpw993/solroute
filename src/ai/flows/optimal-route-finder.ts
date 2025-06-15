@@ -32,7 +32,7 @@ const FindOptimalRouteOutputSchema = z.object({
 });
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
 
-const DEX_POOL = ['Raydium', 'Orca', 'Jupiter', 'Serum', 'Aldrin', 'Saber'];
+const DEX_POOL = ['Raydium', 'Orca', 'Jupiter', 'Serum', 'Aldrin', 'Saber', 'Lifinity', 'Cropper'];
 const ALL_TOKEN_SYMBOLS = mockTokens.map(t => t.symbol);
 
 function getRandomElement<T>(arr: T[]): T {
@@ -46,68 +46,42 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   let currentAmount = amount;
   let totalSlippageFactor = 1.0;
 
-  const numHops = Math.floor(Math.random() * 3) + 2; // Generate 2, 3, or 4 hops
+  // Generate 3 or 4 total hops (meaning 2 or 3 intermediate tokens)
+  const numHops = Math.floor(Math.random() * 2) + 3; 
 
   const availableIntermediateTokens = ALL_TOKEN_SYMBOLS.filter(
     t => t !== inputToken && t !== outputToken
   );
 
-  if (availableIntermediateTokens.length === 0 && numHops > 1) {
-    // Cannot create multi-hop route if no intermediate tokens are available
-    // Fallback to a simpler direct route or throw error, here we simplify.
-     // This case should be rare with a decent token list
-    const directDex = getRandomElement(DEX_POOL);
-    const feePercent = 0.003; // 0.3%
-    const slippagePercent = 0.005; // 0.5%
-    const amountAfterFee = currentAmount * (1 - feePercent);
-    currentAmount = amountAfterFee * (1 - slippagePercent);
-    totalSlippageFactor *= (1 - slippagePercent);
-    route.push({
-        dex: directDex,
-        tokenIn: inputToken,
-        tokenOut: outputToken,
-    });
-
-    return {
-        route,
-        estimatedOutput: currentAmount,
-        slippage: 1 - totalSlippageFactor,
-    };
-  }
-
-
-  let previousIntermediateToken = '';
+  let previousIntermediateToken = ''; // To avoid A -> B -> A type hops if possible
 
   for (let i = 0; i < numHops; i++) {
     const hopDex = getRandomElement(DEX_POOL);
     let nextToken: string;
 
     if (i === numHops - 1) {
-      // Last hop
+      // Last hop always goes to the output token
       nextToken = outputToken;
     } else {
       // Intermediate hop
-      let potentialNextTokens = availableIntermediateTokens.filter(t => t !== currentToken && t !== previousIntermediateToken);
+      let potentialNextTokens = availableIntermediateTokens.filter(
+        t => t !== currentToken && t !== previousIntermediateToken
+      );
+
       if (potentialNextTokens.length === 0) {
-        // Fallback if filtering leaves no options, might happen with small token pools
-        // or very specific input/output. Pick any available intermediate not current.
+        // If filtering leaves no options (e.g., to avoid currentToken and previousIntermediateToken),
+        // try picking any available intermediate token not equal to currentToken.
         potentialNextTokens = availableIntermediateTokens.filter(t => t !== currentToken);
-         if (potentialNextTokens.length === 0) {
-            // Highly unlikely, but as a last resort, use a generic placeholder or break
-            // For mock, let's assume we can always find one or output token is next
-             if (numHops === i + 1) { // if this was meant to be the last hop
-                nextToken = outputToken;
-             } else {
-                // This state indicates an issue with token pool or logic, force outputToken
-                // to prevent infinite loop or error, effectively shortening the route.
-                nextToken = outputToken;
-                // Adjust numHops to reflect early termination if not already last hop
-                // numHops = i + 1; // This line would break the loop condition. Better to just let it use outputToken.
-             }
-         }
       }
-      nextToken = getRandomElement(potentialNextTokens) || outputToken; // Fallback to outputToken if random selection fails
-      previousIntermediateToken = nextToken;
+      
+      if (potentialNextTokens.length === 0) {
+        // If still no options (e.g., availableIntermediateTokens is empty or only contains currentToken),
+        // then this intermediate hop must effectively become the last hop.
+        nextToken = outputToken;
+      } else {
+        nextToken = getRandomElement(potentialNextTokens);
+      }
+      previousIntermediateToken = nextToken; // Keep track of the chosen intermediate for the next iteration
     }
 
     // Simulate per-hop fees and slippage
@@ -125,21 +99,30 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     });
 
     currentToken = nextToken;
-    if (currentToken === outputToken && i < numHops -1) {
-        // Reached output token earlier than expected, stop adding hops
-        break;
+
+    // If we've reached the output token and it's not the designated last hop, stop.
+    if (currentToken === outputToken && i < numHops - 1) {
+      break; 
     }
   }
   
-  // Ensure the last hop's output is indeed the outputToken if loop finished early
-  if (route.length > 0 && route[route.length-1].tokenOut !== outputToken && currentToken !== outputToken) {
-    // This can happen if random token selection logic failed to make progress towards outputToken
-    // or if availableIntermediateTokens was exhausted.
-    // As a fallback, we can either try to add one final hop to outputToken
-    // or adjust the last hop. For simplicity, let's adjust the last hop if possible.
-    // Or, it implies the route could not be formed as requested.
-    // For this mock, we'll assume the loop correctly terminates or is broken.
+  // Ensure the route is not empty and the last hop actually outputs the target outputToken
+  // This can happen if the loop breaks early or intermediate choices were exhausted.
+  if (route.length > 0 && route[route.length-1].tokenOut !== outputToken) {
+     // This case means the intended route could not be fully formed to end with outputToken.
+     // For a mock, this might happen if token pools are very constrained.
+     // We can try to force the last hop to the outputToken or accept the shorter/diverged route.
+     // For simplicity, if it diverged, we might have an unexpected output token.
+     // The current logic tries to ensure last hop is to outputToken or breaks if outputToken is reached early.
+     // If the loop completes and currentToken is not outputToken (very unlikely with the structure),
+     // it indicates a logical flaw or extreme token scarcity.
+     // For this mock, we assume the provided logic handles most cases gracefully by shortening.
   }
+  
+  // If the route is shorter than intended (e.g. 1 or 2 hops) due to token scarcity,
+  // and the requirement is "at least 2 intermediate hops" (i.e. 3 total hops),
+  // this mock might not strictly meet it in *all* edge cases of token availability.
+  // However, it *targets* 3 or 4 hops.
 
 
   return {
@@ -148,3 +131,4 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     slippage: 1 - totalSlippageFactor,
   };
 }
+
