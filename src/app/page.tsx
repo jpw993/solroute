@@ -157,7 +157,11 @@ export default function HomePage() {
                 <AlertDescription>{routeError}</AlertDescription>
               </Alert>
             )}
-            <RouteDetailsCard routeOutput={routeData} isLoading={isLoadingRoute} />
+            <RouteDetailsCard 
+              routeOutput={routeData} 
+              isLoading={isLoadingRoute} 
+              tokens={mockTokens} 
+            />
           </div>
 
           <div className="lg:col-span-1 space-y-8">
