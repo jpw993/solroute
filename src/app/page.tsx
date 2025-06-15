@@ -28,7 +28,6 @@ export default function HomePage() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   
-  // Mock wallet connection persistency and initial state
   useEffect(() => {
     const storedWalletState = localStorage.getItem('solroute-wallet-connected');
     const storedWalletAddress = localStorage.getItem('solroute-wallet-address');
@@ -39,7 +38,6 @@ export default function HomePage() {
   }, []);
 
   const handleConnectWallet = () => {
-    // Simulate wallet connection
     const mockAddress = `mock${Math.random().toString(36).substring(2, 10)}...${Math.random().toString(36).substring(2, 6)}`;
     setWalletConnected(true);
     setWalletAddress(mockAddress);
@@ -57,7 +55,7 @@ export default function HomePage() {
     setWalletAddress(undefined);
     localStorage.removeItem('solroute-wallet-connected');
     localStorage.removeItem('solroute-wallet-address');
-    setRouteData(null); // Clear route data on disconnect
+    setRouteData(null); 
     toast({
       title: "Wallet Disconnected",
       description: "You have successfully disconnected your wallet.",
@@ -69,10 +67,10 @@ export default function HomePage() {
     setRouteError(null);
     setRouteData(null);
 
-    const inputToken = mockTokens.find(t => t.id === data.inputTokenId);
-    const outputToken = mockTokens.find(t => t.id === data.outputTokenId);
+    const inputTokenDetails = mockTokens.find(t => t.id === data.inputTokenId);
+    const outputTokenDetails = mockTokens.find(t => t.id === data.outputTokenId);
 
-    if (!inputToken || !outputToken) {
+    if (!inputTokenDetails || !outputTokenDetails) {
       setRouteError("Invalid token selection.");
       setIsLoadingRoute(false);
       toast({ title: "Error", description: "Invalid token selection.", variant: "destructive" });
@@ -80,17 +78,25 @@ export default function HomePage() {
     }
 
     const aiInput: FindOptimalRouteInput = {
-      inputToken: inputToken.symbol,
-      outputToken: outputToken.symbol,
+      inputToken: inputTokenDetails.symbol,
+      outputToken: outputTokenDetails.symbol,
       amount: data.amount,
     };
 
+    const artificialDelay = new Promise(resolve => setTimeout(resolve, 3000));
+    const findRoutePromise = findOptimalRoute(aiInput);
+
     try {
-      const result = await findOptimalRoute(aiInput);
-      setRouteData(result);
+      // Wait for both the API call and the artificial delay
+      const [_, result] = await Promise.all([
+        artificialDelay,
+        findRoutePromise
+      ]);
+      
+      setRouteData(result as FindOptimalRouteOutput);
       toast({
         title: "Route Found!",
-        description: `Optimal route from ${inputToken.symbol} to ${outputToken.symbol} calculated.`,
+        description: `Optimal route from ${inputTokenDetails.symbol} to ${outputTokenDetails.symbol} calculated.`,
       });
     } catch (error) {
       console.error("Error finding optimal route:", error);
@@ -105,7 +111,6 @@ export default function HomePage() {
   const handleSimulateSwap = () => {
     if (!routeData) return;
     setIsSimulating(true);
-    // Simulate API call
     setTimeout(() => {
       setIsSimulating(false);
       toast({
@@ -119,16 +124,14 @@ export default function HomePage() {
   const handleExecuteSwap = () => {
      if (!routeData) return;
     setIsExecuting(true);
-    // Simulate API call
     setTimeout(() => {
       setIsExecuting(false);
       toast({
         title: "Swap Executed!",
         description: `Successfully swapped tokens. Check your wallet for updates.`,
         variant: "default",
-        className: "bg-green-500 text-white dark:bg-green-600" // Example of custom styling
+        className: "bg-green-500 text-white dark:bg-green-600"
       });
-      // Potentially clear form or update balances here
       setRouteData(null); 
     }, 2500);
   };
