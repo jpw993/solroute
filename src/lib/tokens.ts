@@ -24,4 +24,3 @@ export const mockTokens: Token[] = [
   { id: 'BTC', symbol: 'BTC', name: 'Bitcoin (Wrapped)', iconSrc: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png', decimals: 8, balance: 0.5 }, // Wormhole BTC
   { id: 'ETH', symbol: 'ETH', name: 'Ethereum (Wrapped)', iconSrc: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk/logo.png', decimals: 8, balance: 2.1 }, // Wormhole ETH
 ];
-
