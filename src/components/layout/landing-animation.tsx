@@ -37,10 +37,10 @@ export function LandingAnimation() {
       `}</style>
       <div className="logo-container-animate">
         {/* Display logo larger for the splash screen */}
-        <LogoIcon style={{ width: '200px', height: 'auto' }} />
+        <LogoIcon style={{ width: '250px', height: 'auto' }} /> {/* Increased logo size */}
       </div>
-      <p className="mt-6 text-xl font-medium text-primary animate-pulse">
-        SolRoute
+      <p className="mt-8 text-lg md:text-xl font-medium text-primary animate-pulse text-center px-4">
+        Machine Learning powered DEX routing {/* Updated slogan */}
       </p>
     </div>
   );
