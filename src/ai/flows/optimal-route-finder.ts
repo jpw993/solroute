@@ -33,20 +33,60 @@ const FindOptimalRouteOutputSchema = z.object({
 export type FindOptimalRouteOutput = z.infer<typeof FindOptimalRouteOutputSchema>;
 
 export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<FindOptimalRouteOutput> {
-  // Basic internal model: Simulate a direct swap
   const { inputToken, outputToken, amount } = input;
 
-  // Simulate a realistic fee (e.g., 0.25%) and slippage (e.g., 0.5%)
-  const realisticFeePercentage = 0.0025; // 0.25% fee for a DEX like Raydium
-  const simulatedSlippage = 0.005; // 0.5% slippage
+  let intermediateTokenSymbol: string;
 
-  const simulatedFees = amount * realisticFeePercentage;
-  const estimatedOutputAmount = amount * (1 - realisticFeePercentage - simulatedSlippage);
+  if (inputToken !== 'USDC' && outputToken !== 'USDC') {
+    intermediateTokenSymbol = 'USDC';
+  } else if (inputToken !== 'SOL' && outputToken !== 'SOL') {
+    intermediateTokenSymbol = 'SOL';
+  } else {
+    intermediateTokenSymbol = 'RAY'; // Fallback if both USDC and SOL are endpoints
+    // Ensure RAY is not also an endpoint, for a more robust mock this could be refined
+    if (intermediateTokenSymbol === inputToken || intermediateTokenSymbol === outputToken) {
+        // If RAY is also an endpoint, pick another distinct token if available or a generic placeholder
+        const otherTokens = ['JUP', 'BONK', 'ETH', 'BTC']; // Example other tokens
+        const distinctToken = otherTokens.find(t => t !== inputToken && t !== outputToken);
+        intermediateTokenSymbol = distinctToken || 'ANY_INTERMEDIATE'; // A generic placeholder if no distinct found
+    }
+  }
+
+
+  const dex1 = 'Raydium';
+  const dex2 = 'Orca';
+
+  const feeHop1Percent = 0.0025; // 0.25%
+  const slippageHop1Percent = 0.005; // 0.5%
+  const feeHop2Percent = 0.0030; // 0.30%
+  const slippageHop2Percent = 0.006; // 0.6%
+
+  // Calculate amount after first hop (fees and slippage)
+  const amountAfterFee1 = amount * (1 - feeHop1Percent);
+  const amountAfterSlippage1 = amountAfterFee1 * (1 - slippageHop1Percent);
+  const intermediateAmountObtained = amountAfterSlippage1;
+
+  // Calculate amount after second hop (fees and slippage)
+  const amountAfterFee2 = intermediateAmountObtained * (1 - feeHop2Percent);
+  const estimatedOutputAmount = amountAfterFee2 * (1 - slippageHop2Percent);
+
+  // Calculate total fees
+  const fee1Value = amount * feeHop1Percent;
+  const fee2Value = intermediateAmountObtained * feeHop2Percent; // Fee on the amount entering hop 2
+  const totalFeesValue = fee1Value + fee2Value;
+
+  // Calculate combined slippage factor for the entire route
+  const combinedSlippageFactor = 1 - (1 - slippageHop1Percent) * (1 - slippageHop2Percent);
 
   const route: FindOptimalRouteOutput['route'] = [
     {
-      dex: 'Raydium', // Using a realistic DEX name
+      dex: dex1,
       tokenIn: inputToken,
+      tokenOut: intermediateTokenSymbol,
+    },
+    {
+      dex: dex2,
+      tokenIn: intermediateTokenSymbol,
       tokenOut: outputToken,
     },
   ];
@@ -54,7 +94,8 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   return {
     route,
     estimatedOutput: estimatedOutputAmount,
-    fees: simulatedFees,
-    slippage: simulatedSlippage,
+    fees: totalFeesValue,
+    slippage: combinedSlippageFactor, // Representing total slippage percentage
   };
 }
+
