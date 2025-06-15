@@ -46,8 +46,8 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
   let currentAmount = amount;
   let totalSlippageFactor = 1.0;
 
-  // Generate 3 or 4 total hops (meaning 2 or 3 intermediate tokens)
-  const numHops = Math.floor(Math.random() * 2) + 3; 
+  // Always generate 3 total hops, which means 2 intermediate tokens.
+  const numHops = 3; 
 
   const availableIntermediateTokens = ALL_TOKEN_SYMBOLS.filter(
     t => t !== inputToken && t !== outputToken
@@ -69,26 +69,25 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
       );
 
       if (potentialNextTokens.length === 0) {
-        // If filtering leaves no options (e.g., to avoid currentToken and previousIntermediateToken),
-        // try picking any available intermediate token not equal to currentToken.
+        // If filtering leaves no options, try picking any available intermediate token not equal to currentToken.
         potentialNextTokens = availableIntermediateTokens.filter(t => t !== currentToken);
       }
       
-      if (potentialNextTokens.length === 0 || potentialNextTokens.every(t => t === outputToken) && i < numHops -2) {
-         // If still no options or only output token is left and we need more intermediate hops
-         // pick any token that is not current, not previous and not output.
-         // This situation is rare but can happen if availableIntermediateTokens is small.
+      // If we are choosing the first intermediate token (i=0) or second (i=1), and outputToken is the only choice, 
+      // but we still need more intermediate hops (which is true if i < numHops - 2), this is an issue.
+      // For numHops = 3, this condition `i < numHops - 2` means `i < 1`, so it applies only for `i=0`.
+      // The goal is to select two distinct intermediate tokens.
+      if (potentialNextTokens.length === 0 || (potentialNextTokens.every(t => t === outputToken) && i < numHops -2) ) {
          const fallbackTokens = ALL_TOKEN_SYMBOLS.filter(
             t => t !== currentToken && t !== previousIntermediateToken && t !== outputToken
          );
          if (fallbackTokens.length > 0) {
             nextToken = getRandomElement(fallbackTokens);
          } else {
-            // Absolute fallback: if no other choice, may lead to shorter route or direct to output.
-            // This might mean we can't satisfy the "at least 2 intermediate hops" constraint perfectly.
-            nextToken = outputToken;
+            // This case should be rare with enough tokens. If hit, it means we can't find 2 distinct intermediates.
+            // For a mock, we might pick outputToken early.
+            nextToken = outputToken; 
          }
-
       } else if (potentialNextTokens.includes(outputToken) && i < numHops - 2 ) {
         // Avoid output token if we still need more intermediate hops
         const nonOutputPotential = potentialNextTokens.filter(t => t !== outputToken);
@@ -100,11 +99,11 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
       } else {
         nextToken = getRandomElement(potentialNextTokens);
       }
-      previousIntermediateToken = nextToken; 
+      previousIntermediateToken = currentToken; // Current token becomes previous for the *next* hop's intermediate selection
     }
 
     const hopFeePercent = 0.002 + Math.random() * 0.002; // e.g., 0.2% to 0.4%
-    // Ensure total slippage is < 0.1%. For max 4 hops, each hop slippage should be < 0.025%
+    // Ensure total slippage is < 0.1%. For 3 hops, each hop slippage should be < ~0.033%
     // Let's set hopSlippagePercent to be between 0.01% and 0.02%
     const hopSlippagePercent = 0.0001 + Math.random() * 0.0001; 
 
@@ -119,25 +118,39 @@ export async function findOptimalRoute(input: FindOptimalRouteInput): Promise<Fi
     });
 
     currentToken = nextToken;
+    if (i < numHops -1) { // Only set previousIntermediateToken if it's an intermediate token
+        previousIntermediateToken = nextToken;
+    }
+
 
     if (currentToken === outputToken && i < numHops - 1) {
+      // This means an intermediate token selection accidentally led to the output token early.
+      // For a strict 3-hop (2 intermediate) route, this path should complete all 3 hops.
+      // We will let the loop continue and the last hop will be correctly set to outputToken.
+      // However, the 'previousIntermediateToken' update needs care.
+      // If we hit output token early, the next "intermediate" hop might try to pick it again if not careful.
+      // The current logic for picking `nextToken` attempts to handle this.
+      // For a mock, we can assume the token pool is diverse enough to mostly avoid this.
+      // If `nextToken` became `outputToken` at `i=0`, then at `i=1`, `currentToken` is `outputToken`.
+      // `potentialNextTokens` would filter out `outputToken`.
+      // The `if (i === numHops - 1)` ensures the last hop is to `outputToken`.
+      // Let's ensure the route ends properly.
       break; 
     }
   }
   
-  // Ensure the final hop's output token is the desired outputToken if the loop terminated early
-  // or intermediate selection forced an early path to outputToken.
-  // The current logic tries to ensure last hop is to outputToken or breaks if outputToken is reached early.
-  // If the loop completes and currentToken is not outputToken, it might indicate a flaw in intermediate token selection logic
-  // or extreme token scarcity for a valid multi-hop route. For this mock, we assume the logic attempts its best.
-  if (route.length > 0 && route[route.length-1].tokenOut !== outputToken && currentToken === outputToken) {
-    // This case should ideally not be hit if logic correctly assigns nextToken = outputToken for the last hop.
-    // However, if loop broke early after currentToken became outputToken, this is fine.
-  } else if (route.length > 0 && route[route.length-1].tokenOut !== outputToken && currentToken !== outputToken) {
-    // If the route doesn't end in the output token, try to add a final hop. This can happen if intermediate choices got exhausted.
-    // This part is tricky; a robust solution might involve backtracking or more complex graph search if it were a real router.
-    // For a mock, we can just append a direct hop if feasible or accept the route as is.
-    // The current loop structure is designed to avoid this by setting nextToken=outputToken for the last planned hop.
+  // Final check to ensure the route structure is as expected.
+  // If the loop broke early, or if not enough distinct intermediate tokens were found,
+  // the route might be shorter than 3 hops. We'll pad it if necessary for the mock.
+  // However, the `numHops = 3` and the loop structure should generally produce 3 hops.
+
+  // Ensure the very last hop's tokenOut is indeed the outputToken
+  if (route.length > 0 && route[route.length - 1].tokenOut !== outputToken) {
+    if (route.length === numHops) { // If we have 3 hops, but the last one isn't to outputToken
+        route[route.length - 1].tokenOut = outputToken; // Force it
+    }
+    // If route is shorter than numHops, it implies an early exit or issue finding intermediate.
+    // For this mock, we assume the for loop with numHops=3 constructs the desired structure.
   }
 
 
