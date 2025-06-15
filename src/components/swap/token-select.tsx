@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Control } from 'react-hook-form';
@@ -10,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import Image from 'next/image'; // For potential future image icons
+import Image from 'next/image';
 
 type TokenSelectProps = {
   control: Control<any>; // Control from react-hook-form
@@ -57,7 +58,14 @@ export function TokenSelect({
                   className="cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <token.icon className="h-5 w-5 text-muted-foreground" />
+                    <Image
+                      src={token.iconSrc}
+                      alt={`${token.name} icon`}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                      data-ai-hint={`${token.symbol.toLowerCase()} logo`}
+                    />
                     <span>{token.symbol}</span>
                     <span className="text-xs text-muted-foreground">({token.name})</span>
                   </div>

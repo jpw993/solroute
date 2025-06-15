@@ -1,8 +1,10 @@
+
 import type { Token } from '@/lib/tokens';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { WalletMinimal } from 'lucide-react';
+import Image from 'next/image';
 
 type WalletInfoCardProps = {
   walletConnected: boolean;
@@ -47,7 +49,14 @@ export function WalletInfoCard({ walletConnected, walletAddress, tokens }: Walle
               {tokens.filter(token => token.balance && token.balance > 0).map((token) => (
                 <li key={token.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <token.icon className="h-5 w-5 text-muted-foreground" />
+                    <Image
+                      src={token.iconSrc}
+                      alt={`${token.name} icon`}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                      data-ai-hint={`${token.symbol.toLowerCase()} logo`}
+                    />
                     <span className="font-medium">{token.symbol}</span>
                   </div>
                   <span className="text-foreground">
